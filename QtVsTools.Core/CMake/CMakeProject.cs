@@ -51,7 +51,7 @@ namespace QtVsTools.Core.CMake
                 File.WriteAllText(self.UserPresetsPath, NullPresetsText);
                 self.Status = QtStatus.NullPresets;
             }
-            _ = ThreadHelper.JoinableTaskFactory.RunAsync(self.LoadAsync);
+            ThreadHelper.JoinableTaskFactory.Run(async () => await self.LoadAsync());
         }
 
         public static void Unload()
@@ -59,7 +59,7 @@ namespace QtVsTools.Core.CMake
             var self = ActiveProject;
             if (!StaticAtomic(() => ActiveProject != null, () => ActiveProject = null))
                 return;
-            _ = ThreadHelper.JoinableTaskFactory.RunAsync(self.UnloadAsync);
+            ThreadHelper.JoinableTaskFactory.Run(async () => await self.UnloadAsync());
         }
 
         public static void Convert(string projectFolder)

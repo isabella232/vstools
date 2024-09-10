@@ -109,7 +109,7 @@ namespace QtVsTools.Core.CMake
             if (Status != QtStatus.ConversionPending)
                 return;
             Status = QtStatus.True;
-            _ = ThreadHelper.JoinableTaskFactory.RunAsync(RefreshAsync);
+            ThreadHelper.JoinableTaskFactory.Run(async () => await RefreshAsync());
         }
 
         private async Task CloseMessagesAsync()

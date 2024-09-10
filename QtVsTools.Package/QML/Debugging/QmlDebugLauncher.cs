@@ -127,7 +127,7 @@ namespace QtVsTools.Qml.Debug
             if (!QmlDebugger.CheckCommandLine(execPath, cmd))
                 return S_OK;
 
-            _ = ThreadHelper.JoinableTaskFactory.RunAsync(
+            ThreadHelper.JoinableTaskFactory.Run(
                 async () => await LaunchDebugAsync(execPath, cmd, procId));
             return S_OK;
         }
@@ -140,7 +140,7 @@ namespace QtVsTools.Qml.Debug
             if (!QmlDebugger.CheckCommandLine(execPath, cmd))
                 return false;
 
-            _ = ThreadHelper.JoinableTaskFactory.RunAsync(
+            ThreadHelper.JoinableTaskFactory.Run(
                 async () => await Instance.LaunchDebugAsync(execPath, cmd, procId));
 
             return true;

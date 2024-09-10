@@ -399,7 +399,7 @@ namespace QtVsTools
                 PercentComplete = 0
             });
 
-            var tasks = versions.Select((version, idx) => ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+            var tasks = versions.Select((version, idx) => JoinableTaskFactory.RunAsync(async () =>
             {
                 await Task.Yield();
                 Messages.Print($@"
@@ -425,7 +425,7 @@ namespace QtVsTools
                 });
             }).Task);
 
-            await Task.WhenAll(tasks.ToArray());
+            await Task.WhenAll(tasks);
 
             if (InitializationAwaited)
                 await VsShell.UiThreadAsync(StatusBar.ResetProgress);

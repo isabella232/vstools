@@ -175,13 +175,16 @@ namespace QtVsTools
 
         public int OnModeChange(DBGMODE dbgmodeNew)
         {
-            if (dbgmodeNew == DBGMODE.DBGMODE_Run
-                && HelperFunctions.GetSelectedQtProject(dte) is { } project) {
-                var @namespace = project.VersionInfo?.Namespace;
-                if (!string.IsNullOrEmpty(@namespace))
-                    _ = ThreadHelper.JoinableTaskFactory.RunAsync(() =>
-                        QtVsToolsPackage.Instance.CopyVisualizersFilesAsync(@namespace)
-                    );
+            if (dbgmodeNew != DBGMODE.DBGMODE_Run)
+                return VSConstants.S_OK;
+            if (HelperFunctions.GetSelectedQtProject(dte) is not {} project)
+                return VSConstants.S_OK;
+
+            var @namespace = project.VersionInfo?.Namespace;
+            if (!string.IsNullOrEmpty(@namespace)) {
+                ThreadHelper.JoinableTaskFactory.Run(async () =>
+                    await QtVsToolsPackage.Instance.CopyVisualizersFilesAsync(@namespace)
+                );
             }
             return VSConstants.S_OK;
         }
