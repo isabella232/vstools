@@ -54,7 +54,7 @@ namespace QtVsTools.Core.MsBuild
         private static ConcurrentStopwatch RequestTimer => StaticLazy.Get(() =>
             RequestTimer, () => new ConcurrentStopwatch());
 
-        private static Task BuildDispatcher { get; set; }
+        private static JoinableTask BuildDispatcher { get; set; }
 
         public void StartBuild(
             string configurationName,
@@ -99,6 +99,7 @@ namespace QtVsTools.Core.MsBuild
                 configuredProject = configProject;
                 break;
             }
+
             if (configuredProject == null)
                 throw new ArgumentException($"Unknown configuration '{configurationName}'.");
 
@@ -112,9 +113,14 @@ namespace QtVsTools.Core.MsBuild
                 Targets = targets?.ToList(),
                 LoggerVerbosity = verbosity
             });
-            StaticThreadSafeInit(() => BuildDispatcher,
-                () => BuildDispatcher = Task.Run(BuildDispatcherLoopAsync))
-                .Forget();
+
+            if (VsServiceProvider.Instance is AsyncPackage package) {
+                StaticThreadSafeInit(() => BuildDispatcher,
+                    () => BuildDispatcher = package.JoinableTaskFactory.RunAsync(BuildDispatcherLoopAsync))
+                    .FileAndForget("QtVsTools/MsBuildProject/StartBuildAsync");
+            } else {
+                Messages.Print("Could not run Qt/MSBuild build dispatcher loop.");
+            }
         }
 
         public async Task SetOutdatedAsync(
