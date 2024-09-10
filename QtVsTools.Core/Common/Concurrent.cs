@@ -23,45 +23,51 @@ namespace QtVsTools
 
         protected object CriticalSection { get; } = new();
 
-        protected static ConcurrentDictionary<string, SemaphoreSlim> Resources { get; } = new();
+        protected static ConcurrentDictionary<string, object> Resources { get; } = new();
 
-        protected static SemaphoreSlim Alloc(string resourceName, int n = 1)
+        protected static object Alloc(string resourceName)
         {
-            return Resources.GetOrAdd(resourceName, _ => new SemaphoreSlim(n, n));
+            return Resources.GetOrAdd(resourceName, _ => new object());
         }
 
         protected static void Free(string resourceName)
         {
-            if (!Resources.TryRemove(resourceName, out var resource))
-                return;
-            resource.Dispose();
+            Resources.TryRemove(resourceName, out _);
         }
 
-        protected static bool Get(string resourceName, int timeout = -1, int n = 1)
+        protected static bool Get(string resourceName, int timeout = -1)
         {
-            if (!Resources.TryGetValue(resourceName, out var resource))
-                resource = Alloc(resourceName, n);
-            if (timeout >= 0)
-                return resource.Wait(timeout);
-            resource.Wait();
-            return true;
+            var resource = Alloc(resourceName);
+
+            var lockTaken = false;
+            try {
+                // Attempt to enter the critical section
+                if (timeout >= 0) {
+                    lockTaken = Monitor.TryEnter(resource, timeout);
+                } else {
+                    Monitor.Enter(resource);
+                    lockTaken = true;
+                }
+
+                return lockTaken;
+            } catch {
+                if (lockTaken)
+                    Monitor.Exit(resource);
+                throw;
+            }
         }
 
-        protected static async Task<bool> GetAsync(string resourceName, int timeout = -1, int n = 1)
+        protected static async Task<bool> GetAsync(string resourceName, int timeout = -1)
         {
-            if (!Resources.TryGetValue(resourceName, out var resource))
-                resource = Alloc(resourceName, n);
-            if (timeout >= 0)
-                return await resource.WaitAsync(timeout);
-            await resource.WaitAsync();
-            return true;
+            return await Task.Run(() => Get(resourceName, timeout));
         }
 
         protected static void Release(string resourceName)
         {
             if (!Resources.TryGetValue(resourceName, out var resource))
                 return;
-            resource.Release();
+            if (Monitor.IsEntered(resource))
+                Monitor.Exit(resource);
         }
 
         protected T ThreadSafeInit<T>(Func<T> getValue, Action init)
@@ -224,9 +230,9 @@ namespace QtVsTools
             return StaticThreadSafe(func);
         }
 
-        public static new SemaphoreSlim Alloc(string resourceName, int n = 1)
+        public static new object Alloc(string resourceName)
         {
-            return Concurrent.Alloc(resourceName, n);
+            return Concurrent.Alloc(resourceName);
         }
 
         public static new void Free(string resourceName)
@@ -234,14 +240,14 @@ namespace QtVsTools
             Concurrent.Free(resourceName);
         }
 
-        public static new bool Get(string resourceName, int timeout = -1, int n = 1)
+        public static new bool Get(string resourceName, int timeout = -1)
         {
-            return Concurrent.Get(resourceName, timeout, n);
+            return Concurrent.Get(resourceName, timeout);
         }
 
-        public static new async Task<bool> GetAsync(string resName, int timeout = -1, int n = 1)
+        public static new async Task<bool> GetAsync(string resName, int timeout = -1)
         {
-            return await Concurrent.GetAsync(resName, timeout, n);
+            return await Concurrent.GetAsync(resName, timeout);
         }
 
         public static new void Release(string resourceName)

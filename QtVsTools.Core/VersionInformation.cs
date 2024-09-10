@@ -9,7 +9,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 
 namespace QtVsTools.Core
 {
@@ -122,24 +121,23 @@ namespace QtVsTools.Core
             if (!Directory.Exists(dir))
                 return null;
 
-            CacheSemaphore.Wait();
-            try {
-                var vi = Cache.AddOrUpdate(
-                    dir,
-                    _ => // Add value factory
-                        new VersionInformation(dir),
-                    (key, value) => // Update value factory
-                    {
-                        if (string.IsNullOrEmpty(value.QtDir))
-                            value = new VersionInformation(key);
-                        return value;
-                    });
-                return vi;
-            } catch (Exception exception) {
-                exception.Log();
-                return null;
-            } finally {
-                CacheSemaphore.Release();
+            lock (CacheLock) {
+                try {
+                    var vi = Cache.AddOrUpdate(
+                        dir,
+                        _ => // Add value factory
+                            new VersionInformation(dir),
+                        (key, value) => // Update value factory
+                        {
+                            if (string.IsNullOrEmpty(value.QtDir))
+                                value = new VersionInformation(key);
+                            return value;
+                        });
+                    return vi;
+                } catch (Exception exception) {
+                    exception.Log();
+                    return null;
+                }
             }
         }
 
@@ -147,7 +145,7 @@ namespace QtVsTools.Core
             new((int)v.Major, (int)v.Minor, (int)v.Patch);
 
         private readonly QMakeConf qmakeConf;
-        private static readonly SemaphoreSlim CacheSemaphore = new(1, 1);
+        private static readonly object CacheLock = new();
         private static readonly ConcurrentDictionary<string, VersionInformation> Cache
             = new(Utils.CaseIgnorer);
 
