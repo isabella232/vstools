@@ -27,6 +27,8 @@
       >17.4.0</Version_Microsoft_Build>
     <Version_Microsoft_Build Condition="$(MSBuildVersion.StartsWith('17.9'))"
       >17.9.5</Version_Microsoft_Build>
+    <Version_Microsoft_Build Condition="$(MSBuildVersion.StartsWith('17.11'))"
+      >17.11.4</Version_Microsoft_Build>
   </PropertyGroup>
 
   <!-- Microsoft.VisualStudio.Composition -->
