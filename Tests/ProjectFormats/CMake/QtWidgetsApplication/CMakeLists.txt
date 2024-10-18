@@ -17,11 +17,16 @@ qt_standard_project_setup()
 
 set(PROJECT_SOURCES
     main.cpp
-    QtWidgetsApplication.qrc
     QtWidgetsApplication.ui
     QtWidgetsApplication.h
     QtWidgetsApplication.cpp
 )
+
+if(QT_VERSION VERSION_LESS 5.15)
+    qt5_add_resources(PROJECT_SOURCES QtWidgetsApplication.qrc)
+else()
+    qt_add_resources(PROJECT_SOURCES QtWidgetsApplication.qrc)
+endif()
 
 qt_add_executable(QtWidgetsApplication ${PROJECT_SOURCES})
 

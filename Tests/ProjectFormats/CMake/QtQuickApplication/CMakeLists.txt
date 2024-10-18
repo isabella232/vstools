@@ -17,8 +17,10 @@ set(PROJECT_SOURCES
     main.cpp
 )
 
-if(QT_VERSION VERSION_LESS 6.2)
-    list(APPEND PROJECT_SOURCES qml.qrc)
+if(QT_VERSION VERSION_LESS 5.15)
+    qt5_add_resources(PROJECT_SOURCES qml.qrc)
+elseif(QT_VERSION VERSION_LESS 6.2)
+    qt_add_resources(PROJECT_SOURCES qml.qrc)
 endif()
 
 qt_add_executable(QtQuickApplication ${PROJECT_SOURCES})
