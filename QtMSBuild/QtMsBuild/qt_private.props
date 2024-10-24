@@ -149,7 +149,7 @@ $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
     <LinkNatvisFile>true</LinkNatvisFile>
     <LinkNatvisFile Condition="'$(LinkNatvisRegValue)' == '0'">false</LinkNatvisFile>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'
+  <PropertyGroup Condition="'$(QtBuildConfig)' == 'debug'
                             AND '$(LinkNatvisFile)' == 'true' AND '$(QtInstallDir)' != ''">
     <QConfigPriPath>$([System.IO.Path]::Combine('$(QtInstallDir)',
         'mkspecs', 'qconfig.pri'
@@ -195,7 +195,7 @@ $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
         >%(SharedLibrarySearchPath);$(Qt_LIBPATH_)</SharedLibrarySearchPath>
       <AdditionalOptions Condition="'$(Qt_LINK_OPTIONS_)' != ''"
         >$(Qt_LINK_OPTIONS_) %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)' == 'Debug' AND '$(LinkNatvisFile)' == 'true'"
+      <AdditionalOptions Condition="'$(QtBuildConfig)' == 'debug' AND '$(LinkNatvisFile)' == 'true'"
         >/NATVIS:&quot;$(IntDir)\qt.natvis&quot; %(AdditionalOptions)</AdditionalOptions>
     </Link>
 
