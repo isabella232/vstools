@@ -104,8 +104,11 @@
         ))</DefaultQtVersion>
 
     <!--// Qt build config -->
-    <QtBuildConfig Condition="'$(Configuration)' == 'Debug'">debug</QtBuildConfig>
-    <QtBuildConfig Condition="'$(Configuration)' != 'Debug'">release</QtBuildConfig>
+    <QtBuildConfig Condition="'$(UseDebugLibraries)' == 'true'">debug</QtBuildConfig>
+    <QtBuildConfig Condition="'$(UseDebugLibraries)' == 'false'">release</QtBuildConfig>
+    <QtBuildConfig Condition="'$(QtBuildConfig)' == '' AND
+      ($(Configuration.ToLower().Contains('debug')))">debug</QtBuildConfig>
+    <QtBuildConfig Condition="'$(QtBuildConfig)' == ''">release</QtBuildConfig>
 
     <!--// Qt Plugin default-->
     <QtPlugin>false</QtPlugin>
