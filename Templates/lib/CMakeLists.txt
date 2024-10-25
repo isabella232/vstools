@@ -30,3 +30,4 @@ target_compile_definitions(${PROJECT_NAME}
     PRIVATE
         $pro_lib_define$
 )
+$cmake_precompile_headers$

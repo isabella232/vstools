@@ -26,3 +26,4 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE
         $cmake_qt_libs$
 )
+$cmake_precompile_headers$

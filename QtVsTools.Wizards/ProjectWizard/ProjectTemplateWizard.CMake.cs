@@ -29,6 +29,7 @@ namespace QtVsTools.Wizards.ProjectWizard
             [String("cmake_qt_modules")] Modules,
             [String("cmake_qt_libs")] Libs,
             [String("cmake_qt_helper")] Helper,
+            [String("cmake_precompile_headers")] PrecompileHeaders,
             [String("cmake_project_sources")] ProjectSources
         }
 
@@ -136,6 +137,8 @@ namespace QtVsTools.Wizards.ProjectWizard
             Parameter[CMake.Libs] = string.Join("\r\n        ",
                 qtModules.Select(module => $"Qt::{module}"));
             Parameter[CMake.Helper] = QtCMakeHelper;
+            Parameter[CMake.PrecompileHeaders] = UsePrecompiledHeaders ?
+                "target_precompile_headers(${PROJECT_NAME} PUBLIC stdafx.h)" : string.Empty;
             Parameter[NewProject.Globals] += @"<QT_CMAKE_TEMPLATE>true</QT_CMAKE_TEMPLATE>";
         }
 
