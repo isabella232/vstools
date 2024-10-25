@@ -19,14 +19,14 @@ set(PROJECT_SOURCES
     $sourcefilename$
 )
 
-add_library($projectname$ $cmake_static$ ${PROJECT_SOURCES})
+add_library(${PROJECT_NAME} $cmake_static$ ${PROJECT_SOURCES})
 
-target_link_libraries($projectname$
+target_link_libraries(${PROJECT_NAME}
     PRIVATE
         $cmake_qt_libs$
 )
 
-target_compile_definitions($projectname$
+target_compile_definitions(${PROJECT_NAME}
     PRIVATE
         $pro_lib_define$
 )

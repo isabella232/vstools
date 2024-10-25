@@ -21,10 +21,10 @@ if(QT_VERSION VERSION_LESS 6.2)
     list(APPEND PROJECT_SOURCES qml.qrc)
 endif()
 
-qt_add_executable($projectname$ ${PROJECT_SOURCES})
+qt_add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 
 if(QT_VERSION VERSION_GREATER_EQUAL 6.2)
-    qt_add_qml_module($projectname$
+    qt_add_qml_module(${PROJECT_NAME}
         URI $qml_prefix$
         VERSION 1.0
         RESOURCE_PREFIX "/qt/qml/"
@@ -33,16 +33,16 @@ if(QT_VERSION VERSION_GREATER_EQUAL 6.2)
     )
 endif()
 
-set_target_properties($projectname$
+set_target_properties(${PROJECT_NAME}
     PROPERTIES
         WIN32_EXECUTABLE TRUE
 )
 
-target_link_libraries($projectname$
+target_link_libraries(${PROJECT_NAME}
     PUBLIC
         $cmake_qt_libs$
 )
 
 if(Qt6_FOUND)
-    qt_import_qml_plugins($projectname$)
+    qt_import_qml_plugins(${PROJECT_NAME})
 endif()

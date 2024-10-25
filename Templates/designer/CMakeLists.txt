@@ -20,9 +20,9 @@ set(PROJECT_SOURCES
     $pluginsourcefilename$
 )
 
-add_library($projectname$ SHARED ${PROJECT_SOURCES})
+add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
 
-target_link_libraries($projectname$
+target_link_libraries(${PROJECT_NAME}
     PRIVATE
         $cmake_qt_libs$
 )

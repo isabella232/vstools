@@ -17,9 +17,9 @@ set(PROJECT_SOURCES
     $sourcefilename$
 )
 
-qt_add_executable($projectname$ ${PROJECT_SOURCES})
+qt_add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 
-target_link_libraries($projectname$
+target_link_libraries(${PROJECT_NAME}
     PUBLIC
         $cmake_qt_libs$
 )

@@ -13,14 +13,14 @@ find_package(Qt${QT_VERSION_MAJOR}
 )
 qt_standard_project_setup()
 
-qt_add_executable($projectname$ ${PROJECT_SOURCES})
+qt_add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 
-set_target_properties($projectname$
+set_target_properties(${PROJECT_NAME}
     PROPERTIES
         WIN32_EXECUTABLE TRUE
 )
 
-target_link_libraries($projectname$
+target_link_libraries(${PROJECT_NAME}
     PUBLIC
         $cmake_qt_libs$
 )
