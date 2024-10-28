@@ -332,6 +332,8 @@
         <DependsOn>@(QtRepc)</DependsOn>
         <DynamicSource Condition="'%(QtRepc.DynamicSource)' == 'moc_cpp'">output</DynamicSource>
         <DynamicSource Condition="'%(QtRepc.DynamicSource)' == 'moc'">false</DynamicSource>
+        <OutputFile
+          >$(QtIntDir)moc\moc_$([System.IO.Path]::GetFileNameWithoutExtension('%(QtRepc.OutputFile)')).cpp</OutputFile>
       </QtMoc>
     </ItemGroup>
 
