@@ -6,6 +6,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.VCProjectEngine;
@@ -18,12 +19,31 @@ namespace QtVsTools.Editors
     using Core.Options;
     using VisualStudio;
 
+    internal class QtDesignerFileSniffer : IFileTypeSniffer
+    {
+        private const string Pattern = @"<\s*UI\s+version\s*=\s*""*\d+\.\d+""\s*>";
+
+        public bool IsSupportedFile(string filePath)
+        {
+            try {
+                var line = File.ReadLines(filePath).FirstOrDefault();
+                return System.Text.RegularExpressions.Regex.IsMatch(line?.Trim() ?? "", Pattern);
+            } catch {
+                return false;
+            }
+        }
+    }
+
     [Guid(GuidString)]
     public class QtDesigner : Editor
     {
         public const string GuidString = "96FE523D-6182-49F5-8992-3BEA5F7E6FF6";
         public const string Title = "Qt Widgets Designer";
         public const string LegacyTitle = "Qt Designer";
+
+        public QtDesigner()
+            : base(new QtDesignerFileSniffer())
+        {}
 
         private Guid? guid;
         public override Guid Guid => guid ??= new Guid(GuidString);

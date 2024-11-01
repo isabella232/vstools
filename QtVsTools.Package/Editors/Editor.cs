@@ -26,6 +26,11 @@ namespace QtVsTools.Editors
     using QtVsTools.Core.Common;
     using VisualStudio;
 
+    public interface IFileTypeSniffer
+    {
+        bool IsSupportedFile(string filePath);
+    }
+
     public abstract class Editor : IVsEditorFactory
     {
         public abstract Guid Guid { get; }
@@ -36,6 +41,13 @@ namespace QtVsTools.Editors
         protected virtual string GetTitle(Process editorProcess)
         {
             return editorProcess.StartInfo.FileName;
+        }
+
+        private readonly IFileTypeSniffer fileTypeSniffer;
+
+        protected Editor(IFileTypeSniffer fileSniffer)
+        {
+            fileTypeSniffer = fileSniffer ?? throw new ArgumentNullException(nameof(fileSniffer));
         }
 
         protected virtual string GetToolsPath()
@@ -94,13 +106,15 @@ namespace QtVsTools.Editors
             pbstrEditorCaption = null;
 
             // Validate inputs
+            if (!fileTypeSniffer.IsSupportedFile(pszMkDocument))
+                return VSConstants.VS_E_UNSUPPORTEDFORMAT;
+
             if ((grfCreateDoc & (VSConstants.CEF_OPENFILE | VSConstants.CEF_SILENT)) == 0) {
                 return VSConstants.E_INVALIDARG;
             }
             if (punkDocDataExisting != IntPtr.Zero) {
                 return VSConstants.VS_E_INCOMPATIBLEDOCDATA;
             }
-
             Context = pvHier;
             ItemId = itemid;
 

@@ -5,17 +5,37 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace QtVsTools.Editors
 {
     using Core.Options;
 
+    internal class QtLinguistFileSniffer : IFileTypeSniffer
+    {
+        public bool IsSupportedFile(string filePath)
+        {
+            try
+            {
+                var line = File.ReadLines(filePath).Skip(1).FirstOrDefault();
+                return line?.Trim().Equals("<!DOCTYPE TS>") ?? false;
+            } catch {
+                return false;
+            }
+        }
+    }
+
     [Guid(GuidString)]
     public class QtLinguist : Editor
     {
         public const string GuidString = "4A1333DC-5C94-4F14-A7BF-DC3D96092234";
         public const string Title = "Qt Linguist";
+
+        public QtLinguist()
+            : base(new QtLinguistFileSniffer())
+        {}
 
         private Guid? guid;
         public override Guid Guid => guid ??= new Guid(GuidString);
