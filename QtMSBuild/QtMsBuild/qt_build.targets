@@ -162,7 +162,8 @@
         <LanguageStandard Condition="'$(Qt_STDCPP_)' != ''
                           AND '%(ClCompile.LanguageStandard)' == 'Default'"
           >$(Qt_STDCPP_)</LanguageStandard>
-        <RuntimeLibrary Condition="'$(Qt_RUNTIME_)' != ''"
+        <RuntimeLibrary Condition="'$(Qt_RUNTIME_)' != ''
+                          AND '%(ClCompile.RuntimeLibrary)' == ''"
           >$(Qt_RUNTIME_)</RuntimeLibrary>
       </ClCompile>
       <ResourceCompile>
