@@ -110,7 +110,8 @@
     <!-- write .cpp file -->
     <WriteLinesToFile
       File="$(QtQmlPluginImportCpp)"
-      Lines="@(QmlPluginImportCpp)" />
+      Lines="@(QmlPluginImportCpp)"
+      Overwrite="true"/>
 
     <!-- clean-up -->
     <PropertyGroup>
@@ -369,6 +370,10 @@
 
     <WriteLinesToFile Condition="'$(QtQmlImportFileSource)' != '$(QtPrevQmlImportFileSource)'"
       File="$(QtQmlStaticImportFile)" Lines="@(QtQmlImportFileSource)" Overwrite="true" />
+
+    <PropertyGroup Condition="Exists('$(QtQmlStaticImportFile)')">
+      <QtStaticPlugins>true</QtStaticPlugins>
+    </PropertyGroup>
   </Target>
 
   <!--
