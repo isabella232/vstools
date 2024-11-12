@@ -42,7 +42,7 @@
   /////////////////////////////////////////////////////////////////////////////////////////////////
   // Get default C++ properties
   // -->
-  <Target Name="QtGetDefaultClCompile">
+  <Target Name="QtGetDefaultClCompile" BeforeTargets="ComputeReferenceCLInput">
     <ItemGroup>
       <ClCompile Include="DefaultClCompile"/>
     </ItemGroup>
