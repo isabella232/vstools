@@ -470,6 +470,15 @@
       SourceFiles="$(QtVarsWorkDir)\qtvars_plugin_import.cpp"
       DestinationFiles="$(QtVarsOutputDir)\qtvars_plugin_import.cpp"/>
 
+    <!--// Copy generated qtvars_qml_plugin_import.cpp to $(QtVarsOutputDir) -->
+    <Delete
+      Condition="'$(ErrorLevel)' == '0'"
+      Files="$(QtVarsOutputDir)\qtvars_qml_plugin_import.cpp"/>
+    <Copy
+      Condition="'$(ErrorLevel)' == '0' AND Exists('$(QtVarsWorkDir)\qtvars_qml_plugin_import.cpp')"
+      SourceFiles="$(QtVarsWorkDir)\qtvars_qml_plugin_import.cpp"
+      DestinationFiles="$(QtVarsOutputDir)\qtvars_qml_plugin_import.cpp"/>
+
     <!--// Clean-up -->
     <ItemGroup>
       <QtModuleList Remove="@(QtModuleList)"/>
