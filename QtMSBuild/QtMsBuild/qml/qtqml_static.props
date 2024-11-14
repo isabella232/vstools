@@ -18,10 +18,6 @@
     Condition="'$(QtMsBuildProps_BeforeQmlStatic)' != ''"
     Project="$(QtMsBuildProps_BeforeQmlStatic)"/>
 
-  <PropertyGroup>
-    <QtQmlPluginImportCpp>$(QtQmlIntDir)\qml_plugin_import.cpp</QtQmlPluginImportCpp>
-  </PropertyGroup>
-
   <!--
   /////////////////////////////////////////////////////////////////////////////////////////////////
   // Import dependants
