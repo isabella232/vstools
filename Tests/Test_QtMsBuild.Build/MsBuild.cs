@@ -152,6 +152,7 @@ namespace QtVsTools.Test.QtMsBuild.Build
             };
             msbuildStartInfo.EnvironmentVariables["VsInstallRoot"] = Properties.VsInstallRoot;
             msbuildStartInfo.EnvironmentVariables["VCTargetsPath"] = Properties.VCTargetsPath;
+            msbuildStartInfo.EnvironmentVariables["QtMsBuild"] = GlobalProperties["QtMsBuild"];
 
             var msbuildProc = new Process
             {
