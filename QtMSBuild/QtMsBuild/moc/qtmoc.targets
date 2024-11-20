@@ -162,29 +162,6 @@
 
   <!--
   /////////////////////////////////////////////////////////////////////////////////////////////////
-  /// TARGET QtMocUpdateIncludePath
-  /////////////////////////////////////////////////////////////////////////////////////////////////
-  //
-  // -->
-  <Target Name="QtMocUpdateIncludePath"
-    DependsOnTargets="QtVars"
-    BeforeTargets="QtMoc"
-    Condition="'@(QtMoc)' != ''">
-    <PropertyGroup>
-      <QtMocPrecompiledHeader>@(ClCompile->WithMetadataValue('Identity','DefaultClCompile')->'%(PrecompiledHeader)')</QtMocPrecompiledHeader>
-    </PropertyGroup>
-    <ItemGroup>
-      <QtMoc>
-        <IncludePath>%(QtMoc.IncludePath);$(Qt_INCLUDEPATH_)</IncludePath>
-      </QtMoc>
-      <QtMoc Condition="'$(QtMocPrecompiledHeader)' == 'Use'">
-        <IncludePath>%(QtMoc.IncludePath);$(ProjectDir)</IncludePath>
-      </QtMoc>
-    </ItemGroup>
-  </Target>
-
-  <!--
-  /////////////////////////////////////////////////////////////////////////////////////////////////
   /// TARGET QtMoc
   /////////////////////////////////////////////////////////////////////////////////////////////////
   // Process each source file and produce the corresponding QtWork items
