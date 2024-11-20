@@ -15,9 +15,9 @@ namespace QtVsTools.Test.QtMsBuild.Build
         [TestMethod]
         public void BigSolution_Build()
         {
-            if (Properties.Configuration == "Release")
-                Assert.Inconclusive("Disabled in the 'Release' configuration.");
-
+#if !ENABLE_TEST_BIGSOLUTION
+            Assert.Inconclusive();
+#endif
             using var temp = new TempProject();
             temp.GenerateBigSolution(
                 $@"{Properties.SolutionDir}Tests\BigSolution\template", 100);
