@@ -179,7 +179,6 @@
       </QtMoc>
       <QtMoc Condition="'$(QtMocPrecompiledHeader)' == 'Use'">
         <IncludePath>%(QtMoc.IncludePath);$(ProjectDir)</IncludePath>
-        <AdditionalIncludeDirectories>%(QtMoc.AdditionalIncludeDirectories);$(ProjectDir)</AdditionalIncludeDirectories>
       </QtMoc>
     </ItemGroup>
   </Target>

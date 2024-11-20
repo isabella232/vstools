@@ -146,7 +146,7 @@
           BeforeTargets="ClCompile;ResourceCompile">
 
     <ItemGroup>
-      <QtIncludePath Include="$(Qt_INCLUDEPATH_)" />
+      <QtIncludePath Include="$(Qt_INCLUDEPATH_);$(ProjectDir)" />
     </ItemGroup>
     <PropertyGroup>
       <QtIncludePath>@(QtIncludePath->Distinct())</QtIncludePath>
