@@ -5,7 +5,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -72,8 +71,7 @@ namespace QtVsTools.TestAdapter
             QtTestSettings.PrintSettings(settings, logger: log);
 
             var tasks = new List<Task>();
-            var groupedTests = testCases.GroupBy(testCase => testCase.Source, Utils.CaseIgnorer)
-                .ToImmutableList();
+            var groupedTests = testCases.GroupBy(testCase => testCase.Source, Utils.CaseIgnorer);
             foreach (var group in groupedTests) {
                 foreach (var testCase in group)
                     frameworkHandle.RecordStart(testCase);
