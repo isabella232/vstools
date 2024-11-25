@@ -1,3 +1,28 @@
+Qt Visual Studio Tools version 3.3.1:
+
+This release contains numerous bug fixes for Qt/MSBuild.
+
+Changes
+-------
+- Fixed QTVSADDINBUG-1258: Fix Qt tesat adapter not able to resolve library dependencies
+- Fixed QTVSADDINBUG-1224: Validate .ts files before opening them in the translation editor
+- Fixed QTVSADDINBUG-1239: Fix include path for moc with pre-compiled headers
+- Fixed QTVSADDINBUG-1173: Fix QML static plugin not added to build
+- Fixed QTVSADDINBUG-1225: Fix repc output being ignored by moc
+- Fixed QTVSADDINBUG-1173: Fix QML plugins not working with the static build
+- Fixed QTVSADDINBUG-1252: Fix RuntimeLibrary option not being propagated from Qt_RUNTIME_
+- Fixed QTVSADDINBUG-1241: Fix PublicIncludeDirectories not being passed to MOC
+- Fixed QTVSADDINBUG-1236: Use qt_add_resources instead of CMAKE_AUTORCC in templates and tests
+- Fixed QTVSADDINBUG-1228: Add readme to Qt/MSBuild to clarify the steps to use it standalone
+- Fixed QTVSADDINBUG-1237: Check $(UseDebugLibraries) in addition to $(Configuration) in config
+- Fixed QTVSADDINBUG-1240: Add Qt include directories and preprocessor directives to RC files
+- Fixed QTVSADDINBUG-1235: Add target_precompile_headers to CMakeLists.txt when they are enabled
+- Fixed QTVSADDINBUG-1231: Make spelling of QML Language Server consistent
+- Fixed QTVSADDINBUG-1212: Add env["QTDIR"] instead of %QTDIR% to path for CMake projects
+- Fixed QTVSADDINBUG-1222: Fix user-defined C++ version overwritten
+- Fixed QTVSADDINBUG-1222: Fix issue with moc and precompiled headers
+
+
 Qt Visual Studio Tools version 3.3.0:
 
 This update to the Qt VS Tools extension introduces experimental support for the Visual Studio test
