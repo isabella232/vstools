@@ -11,7 +11,7 @@ using System.Xml;
 using System.Xml.Schema;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
 
-#if _DEBUG
+#if _DEBUG_SETTINGS
 using System.Diagnostics;
 #endif
 
@@ -55,7 +55,7 @@ namespace QtVsTools.TestAdapter
 
         internal static QtTestSettings Load(XmlReader xmlReader, string nodeName)
         {
-#if _DEBUG
+#if _DEBUG_SETTINGS
             Debugger.Launch();
 #endif
             var schemaSet = new XmlSchemaSet();

@@ -12,7 +12,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
-#if _DEBUG
+#if _DEBUG_DISCOVERER
 using System.Diagnostics;
 #endif
 
@@ -32,7 +32,7 @@ namespace QtVsTools.TestAdapter
             _ = logger ?? throw new ArgumentNullException(nameof(logger));
             _ = discoverySink ?? throw new ArgumentNullException(nameof(discoverySink));
 
-#if _DEBUG
+#if _DEBUG_DISCOVERER
             Debugger.Launch();
 #endif
 
