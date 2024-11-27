@@ -22,6 +22,7 @@ namespace QtVsTools.TestAdapter
     internal class QtTestSettings
     {
         internal string QtInstall { get; private set; }
+        internal bool EnabledAdapter { get; private set; } = true;
         internal bool ShowAdapterOutput { get; private set; }
 
         internal int TestTimeout { get; private set; } = -1;
@@ -186,6 +187,10 @@ namespace QtVsTools.TestAdapter
                 switch (reader.Name.ToUpperInvariant()) {
                 case "QTINSTALL":
                     settings.QtInstall = reader.ReadInnerXml();
+                    break;
+                case "ENABLEDADAPTER":
+                    if (bool.TryParse(reader.ReadInnerXml(), out var enable))
+                        settings.EnabledAdapter = enable;
                     break;
                 case "SHOWADAPTEROUTPUT":
                     if (bool.TryParse(reader.ReadInnerXml(), out var adapterOutput))

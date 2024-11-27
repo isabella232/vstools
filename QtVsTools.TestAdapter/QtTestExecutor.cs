@@ -71,6 +71,10 @@ namespace QtVsTools.TestAdapter
             QtTestSettings.MergeSettings(settings, userSettings);
             log.SetShowAdapterOutput(settings.ShowAdapterOutput);
             QtTestSettings.PrintSettings(settings, logger: log);
+            if (!settings.EnabledAdapter) {
+                log.ForceSendMessage("Qt test adapter is disabled. Tests will not be executed.");
+                return;
+            }
 
             var tasks = new List<Task>();
             var groupedTests = testCases.GroupBy(testCase => testCase.Source, Utils.CaseIgnorer);

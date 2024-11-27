@@ -2631,6 +2631,13 @@ QTEST_MAIN(QtTest)
         \li Occurrence
         \li Default value
         \li Example
+
+    \row
+        \li EnabledAdapter
+        \li Enables or disables the Qt test adapter.
+        \li Once
+        \li \c true
+        \li \c {<EnabledAdapter>true</EnabledAdapter>}
     \row
         \li ShowAdapterOutput
         \li Shows output from the test adapter in \uicontrol Output >

@@ -8,6 +8,7 @@
       <!-- General option, need to be available always -->
       <xs:element name="QtInstall" type="xs:string"/>
       <!-- others, might be there or not -->
+      <xs:element name="EnabledAdapter" minOccurs="0" type="xs:boolean"/>
       <xs:element name="ShowAdapterOutput" minOccurs="0" type="xs:boolean"/>
       <xs:element name="TestTimeout" minOccurs="0" type="xs:int"/>
       <xs:element name="DiscoveryTimeout" minOccurs="0" type="xs:int"/>
@@ -26,6 +27,7 @@
     <xs:sequence>
       <!-- General options, need to be available always -->
       <xs:element name="QtInstall" type="xs:string"/>
+      <xs:element name="EnabledAdapter" type="xs:boolean"/>
       <xs:element name="ShowAdapterOutput" type="xs:boolean"/>
       <xs:element name="TestTimeout" type="xs:int"/>
       <xs:element name="DiscoveryTimeout" type="xs:int"/>

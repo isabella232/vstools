@@ -55,6 +55,7 @@ namespace QtVsTools.Package.TestAdapter
             var root = document.CreateElement(QTA.Resources.GlobalSettingsName);
 
             AppendChildElement(document, root, "QtInstall", QTA.QtTestPage.QtInstall);
+            AppendChildElement(document, root, "EnabledAdapter", QTA.QtTestPage.EnableAdapter);
             AppendChildElement(document, root, "ShowAdapterOutput", QTA.QtTestPage.ShowAdapterOutput);
             AppendChildElement(document, root, "TestTimeout", QTA.QtTestPage.TestTimeout);
             AppendChildElement(document, root, "DiscoveryTimeout", QTA.QtTestPage.DiscoveryTimeout);

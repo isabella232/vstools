@@ -76,6 +76,11 @@ namespace QtVsTools.TestAdapter
             QtTestSettings.MergeSettings(settings, userSettings);
             log.SetShowAdapterOutput(settings.ShowAdapterOutput);
             QtTestSettings.PrintSettings(settings, logger: log);
+            if (!settings.EnabledAdapter) {
+                log.ForceSendMessage("Qt test adapter is disabled. Test discovery will not be "
+                    + "performed.");
+                return false;
+            }
 
             var filtered = sources.Where(source => source != null
                 && source.EndsWith(Resources.FileExtension, Utils.IgnoreCase)).ToList();
