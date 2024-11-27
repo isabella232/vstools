@@ -18,7 +18,7 @@ namespace QtVsTools.TestAdapter
         {
             this.logger = logger;
             this.workload = workload;
-            logger.SendMessage(TestMessageLevel.Informational, $"Starting Qt tests {workload}.");
+            ForceSendMessage($"Starting Qt tests {workload}.");
         }
 
         internal void SetShowAdapterOutput(bool show) => showAdapterOutput = show;
@@ -29,9 +29,14 @@ namespace QtVsTools.TestAdapter
                 logger.SendMessage(level, message);
         }
 
+        internal void ForceSendMessage(string message, TestMessageLevel level = TestMessageLevel.Informational)
+        {
+            logger.SendMessage(level, message);
+        }
+
         public void Dispose()
         {
-            logger.SendMessage(TestMessageLevel.Informational, $"Finished Qt tests {workload}.");
+            ForceSendMessage($"Finished Qt tests {workload}.");
         }
     }
 }

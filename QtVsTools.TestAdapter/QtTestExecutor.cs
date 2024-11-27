@@ -55,16 +55,18 @@ namespace QtVsTools.TestAdapter
             var provider = context.RunSettings?.GetSettings(Resources.GlobalSettingsName);
             var settings = (provider as QtTestGlobalSettingsProvider)?.Settings;
             if (settings == null) {
-                log.SendMessage("Error reading the 'QtTestGlobal' section from the .runsettings "
-                    + "file. This section is expected to be always present. No further attempt is "
-                    + "made to run executable files.");
+                log.ForceSendMessage("Error reading the 'QtTestGlobal' section from the "
+                    + ".runsettings file. This section is required. No further attempts "
+                    + "will be made to examine executable files.");
                 return;
             }
 
             provider = context.RunSettings?.GetSettings(Resources.SettingsName);
             var userSettings = (provider as QtTestSettingsProvider)?.Settings;
-            if (userSettings == null)
-                log.SendMessage("Cannot find QtTest section in .runsettings file.");
+            if (userSettings == null) {
+                log.ForceSendMessage("QtTest section not found in the .runsettings file. "
+                    + "Continuing with default settings.");
+            }
 
             QtTestSettings.MergeSettings(settings, userSettings);
             log.SetShowAdapterOutput(settings.ShowAdapterOutput);
@@ -118,7 +120,7 @@ namespace QtVsTools.TestAdapter
 
             log.SendMessage($"Running Qt auto-test '{Path.GetFileName(filePath)}' "
                 + $"with arguments: '{arguments}'"
-                + $"{(runContext.IsBeingDebugged ? " attached to the debugger." : ".")}");
+                + $"{(runContext.IsBeingDebugged ? " (Debugger attached)." : ".")}");
 
             try {
                 await Task.Run(async () =>
@@ -138,7 +140,7 @@ namespace QtVsTools.TestAdapter
 
                     log.SendMessage($"Started process: '{filePath}', PID: '{monitor.ProcessId}'.");
                     monitor.WaitForExit(runContext.IsBeingDebugged ? -1 : settings.TestTimeout);
-                    log.SendMessage($"Process finished, Exit code: '{monitor.ExitCode}'.");
+                    log.SendMessage($"Process completed with exit code: '{monitor.ExitCode}'.");
 
                     var result = XmlParser.Parse(await Utils.ReadAllTextAsync(tmpFile));
 
@@ -170,7 +172,7 @@ namespace QtVsTools.TestAdapter
                                         }
                                     }
                                 );
-                                log.SendMessage($"Adding attachment: '{testResult.Attachments.Last()}");
+                                log.SendMessage($"Adding attachment: '{testResult.Attachments.Last()}'.");
                             }
 
                             if (testResult.Outcome == TestOutcome.Failed) {
@@ -192,7 +194,7 @@ namespace QtVsTools.TestAdapter
                     TestMessageLevel.Error);
                 SetTestCasesDoNotHaveAnOutcome(group);
             } catch (Exception exception) {
-                log.SendMessage("Exception was thrown while running Qt auto-test "
+                log.SendMessage("An exception occurred while running Qt auto-test "
                     + $"'{Path.GetFileName(filePath)}' with arguments: '{arguments}'."
                     + Environment.NewLine + exception, TestMessageLevel.Error);
                 SetTestCasesDoNotHaveAnOutcome(group);

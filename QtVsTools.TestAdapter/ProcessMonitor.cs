@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace QtVsTools.TestAdapter
 {
@@ -60,8 +61,11 @@ namespace QtVsTools.TestAdapter
                 WorkingDirectory = workingDirectory ?? ""
             };
 
-            if (VersionInformation.GetOrAddByName(settings.QtInstall) is not { LibExecs: {} bin })
+            if (VersionInformation.GetOrAddByName(settings.QtInstall) is not {LibExecs: {} bin}) {
+                log.SendMessage($"Could not find Qt version '{settings.QtInstall}'. "
+                    + "Not added to path.", TestMessageLevel.Error);
                 return startInfo;
+            }
 
             startInfo.Environment["Path"] = HelperFunctions.ToNativeSeparator(bin);
             log.SendMessage($"Added Qt version '{settings.QtInstall}': '{bin}' to path.");

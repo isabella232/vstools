@@ -8,6 +8,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
+using static System.Environment;
+
 namespace QtVsTools.TestAdapter
 {
     internal static class Binary
@@ -110,7 +112,7 @@ namespace QtVsTools.TestAdapter
             type = Type.Unknown;
 
             if (!File.Exists(filePath)) {
-                log.SendMessage($"Check binary type - File not found: '{filePath}'.",
+                log.SendMessage($"Binary type check failed - File not found: '{filePath}'.",
                     TestMessageLevel.Error);
                 return false;
             }
@@ -120,24 +122,24 @@ namespace QtVsTools.TestAdapter
                 using var reader = new BinaryReader(stream);
 
                 if (stream.Length < Marshal.SizeOf<IMAGE_DOS_HEADER>()) {
-                    log.SendMessage("Check binary type - File too small to contain a valid DOS "
-                        + $"header: '{filePath}'.", TestMessageLevel.Error);
+                    log.SendMessage("Binary type check failed - File is too small to contain a "
+                        + $"valid DOS header: '{filePath}'.", TestMessageLevel.Error);
                     return false;
                 }
 
                 var dosHeader = ReadStruct<IMAGE_DOS_HEADER>(reader);
                 if (dosHeader.e_magic != IMAGE_DOS_SIGNATURE) {
-                    log.SendMessage(
-                        $"Check binary type - Invalid DOS header signature: '{filePath}'."
-                        + $" Expected: {IMAGE_DOS_SIGNATURE}, Actual: {dosHeader.e_magic}",
-                        TestMessageLevel.Error);
+                    log.SendMessage("Binary type check failed - Invalid DOS header signature in "
+                        + $"file: '{filePath}'. Expected: {IMAGE_DOS_SIGNATURE}, "
+                        + $"Actual: {dosHeader.e_magic}.", TestMessageLevel.Error);
                     return false;
                 }
 
                 if (dosHeader.e_lfanew < 0
                     || dosHeader.e_lfanew > stream.Length - Marshal.SizeOf<IMAGE_NT_HEADERS>()) {
-                    log.SendMessage("Check binary type - Invalid or corrupted NT header offset: "
-                        + $"'{filePath}'. Offset: {dosHeader.e_lfanew}", TestMessageLevel.Error);
+                    log.SendMessage("Binary type check failed - Invalid or corrupted NT header "
+                        + $"offset in file: '{filePath}'. Offset: {dosHeader.e_lfanew}.",
+                        TestMessageLevel.Error);
                     return false;
                 }
 
@@ -145,10 +147,9 @@ namespace QtVsTools.TestAdapter
 
                 var ntHeaders = ReadStruct<IMAGE_NT_HEADERS>(reader);
                 if (ntHeaders.Signature != IMAGE_NT_SIGNATURE) {
-                    log.SendMessage(
-                        $"Check binary type - Invalid NT header signature: '{filePath}'. "
-                        + $"Expected: {IMAGE_NT_SIGNATURE}, Actual: {ntHeaders.Signature}",
-                        TestMessageLevel.Error);
+                    log.SendMessage("Binary type check failed - Invalid NT header signature in "
+                        + $"file: '{filePath}'. Expected: {IMAGE_NT_SIGNATURE}, "
+                        + $"Actual: {ntHeaders.Signature}.", TestMessageLevel.Error);
                     return false;
                 }
 
@@ -159,15 +160,14 @@ namespace QtVsTools.TestAdapter
                     _ => Type.Unknown
                 };
             } catch (IOException ioException) {
-                log.SendMessage("IOException was thrown while checking the binary type."
-                    + Environment.NewLine + ioException, TestMessageLevel.Error);
+                log.SendMessage($"IOException occurred while checking the binary type.{NewLine}"
+                    + $"{ioException}", TestMessageLevel.Error);
             } catch (UnauthorizedAccessException unauthorizedAccessException) {
-                log.SendMessage(
-                    "UnauthorizedAccessException was thrown while checking the binary type."
-                    + Environment.NewLine + unauthorizedAccessException, TestMessageLevel.Error);
+                log.SendMessage("UnauthorizedAccessException occurred while checking the binary "
+                    + $"type.{NewLine}{unauthorizedAccessException}", TestMessageLevel.Error);
             } catch (Exception exception) {
-                log.SendMessage("Exception was thrown while checking the binary type."
-                    + Environment.NewLine + exception, TestMessageLevel.Error);
+                log.SendMessage($"An exception occurred while checking the binary type.{NewLine}"
+                    + $"{exception}", TestMessageLevel.Error);
             }
 
             return type != Type.Unknown;

@@ -78,8 +78,8 @@ namespace QtVsTools.TestAdapter
                     enumByAddress.Next(1, out symbol, out _);
                 }
             } catch (Exception exception) {
-                log.SendMessage($"Exception was thrown while parsing PDB file: '{filePath}'."
-                    + Environment.NewLine + exception, TestMessageLevel.Error);
+                log.SendMessage($"An exception occurred while parsing the PDB file: '{filePath}'."
+                    + $"{Environment.NewLine}{exception}", TestMessageLevel.Error);
             } finally {
                 if (enumByAddress != null)
                     Marshal.ReleaseComObject(enumByAddress);
