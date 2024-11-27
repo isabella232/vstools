@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
@@ -155,6 +156,11 @@ namespace QtVsTools.TestAdapter
             return discoveredCases.Any();
         }
 
+        private static readonly Regex CppIdentifierRegex = new("^[a-zA-Z_][a-zA-Z0-9_]*$",
+            RegexOptions.Compiled);
+        private static readonly Regex UsageRegex = new(@"Usage:\s.*?\s\[options\] "
+            + @"\[testfunction\[:testdata\]\]", RegexOptions.Compiled);
+
         private static bool TryGetSymbols(string filePath, QtTestSettings settings, Logger log,
             out Dictionary<string, HashSet<string>> dataTags)
         {
@@ -167,21 +173,20 @@ namespace QtVsTools.TestAdapter
 
             var id = 0;
             try {
-                var startupInfo = ProcessMonitor.CreateStartInfo(filePath,
-                    "-datatags -platform offscreen", redirectStandardOutput: true,
-                    Path.GetDirectoryName(filePath), settings, log);
+                var output = RunProcess("-help -platform offscreen", filePath, settings,
+                    "Started process to verify QtTest binary", log, out id);
+                if (!output.Any(line => UsageRegex.IsMatch(line))) {
+                    log.SendMessage($"Executable: '{exe}' is not a QtTest application.");
+                    return false;
+                }
 
-                var monitor = new ProcessMonitor();
-                monitor.StartProcess(startupInfo);
-                log.SendMessage($"Started process: '{exe}', PID: '{id = monitor.ProcessId}'.");
-
-                monitor.WaitForExit(settings.DiscoveryTimeout);
-                log.SendMessage($"Process '{exe}', PID: '{id}' did exit in time. Exit code: "
-                    + $"'{monitor.ExitCode}'.");
-
-                dataTags = (monitor.StandardOutput ?? Enumerable.Empty<string>())
+                output = RunProcess("-datatags -platform offscreen", filePath, settings,
+                    "Started process to retrieve QtTest data tags", log, out id);
+                dataTags = output
                     .Select(line => line.Split(' '))
                     .Where(parts => parts.Length >= 2)
+                    .Where(parts => CppIdentifierRegex.IsMatch(parts[0]) &&
+                        CppIdentifierRegex.IsMatch(parts[1]))
                     .GroupBy(parts => parts[0])
                     .ToDictionary(
                         group => group.Key,
@@ -215,6 +220,23 @@ namespace QtVsTools.TestAdapter
             }
 
             return false;
+        }
+
+        private static List<string> RunProcess(string args, string filePath,
+            QtTestSettings settings, string message, Logger log, out int id)
+        {
+            var exe = Path.GetFileName(filePath);
+            var startupInfo = ProcessMonitor.CreateStartInfo(filePath, args,
+                redirectStandardOutput: true, Path.GetDirectoryName(filePath), settings, log);
+
+            var monitor = new ProcessMonitor();
+            monitor.StartProcess(startupInfo);
+            log.SendMessage($"{message}: '{exe}', PID: '{id = monitor.ProcessId}'.");
+            monitor.WaitForExit(settings.DiscoveryTimeout);
+            log.SendMessage($"Process '{exe}', PID: '{id}', exited on time. Exit code: "
+                + $"'{monitor.ExitCode}'.");
+
+            return monitor.StandardOutput ?? new List<string>();
         }
     }
 }
