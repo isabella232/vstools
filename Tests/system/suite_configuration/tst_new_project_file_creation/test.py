@@ -86,7 +86,8 @@ def getExpectedBuiltFile(projectsBuiltBefore, workDir, projectName, templateName
     if cmakeBased:
         buildPath = os.path.join(buildPath, "out", "build", "debug", projectName)
     else:
-        if projectsBuiltBefore != 0 and getMsvsVersionAsList() >= [17, 10, 0]:
+        if (projectsBuiltBefore != 0
+            and getMsvsVersionAsList() >= [17, 10, 0] and getMsvsVersionAsList() < [17, 12, 0]):
             # Handle MSVS changing the build directory
             # https://developercommunity.visualstudio.com/t/Changing-location-of-built-exe/10677463
             buildPath = os.path.join(buildPath, projectName)
