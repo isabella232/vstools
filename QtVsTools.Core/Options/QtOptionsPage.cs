@@ -71,7 +71,8 @@ namespace QtVsTools.Core.Options
             [String("Notifications_UpdateQtInstallation")] UpdateQtInstallation,
             [String("Notifications_UpdateProjectFormat")] UpdateProjectFormat,
             [String("Notifications_CMake_Incompatible")] CMakeIncompatible,
-            [String("Notifications_CMake_Conversion")] CMakeConversion
+            [String("Notifications_CMake_Conversion")] CMakeConversion,
+            [String("NotifySearchDevRelease")] NotifySearchDevRelease
         }
 
         public enum Natvis
@@ -95,7 +96,6 @@ namespace QtVsTools.Core.Options
 
         public enum DevelopmentReleases
         {
-            [String("NotifySearchDevRelease")] NotifySearchDevRelease,
             [String("SearchDevRelease")] SearchDevRelease,
             [String("SearchDevReleaseTimeout")]  SearchDevReleaseTimeout
         }
@@ -518,10 +518,10 @@ namespace QtVsTools.Core.Options
         public static string StylesheetPath =>
             QtOptionsPageSettings.Instance.GetValue(() => StylesheetPath);
 
-        [Category("Development releases")]
-        [DisplayName("Notification")]
-        [Description("Show a notification to allow the user to enable automatic searching for "
-            + "development releases.")]
+        [Category("Notifications")]
+        [DisplayName("Development releases")]
+        [Description("Display a notification that allows users to enable or disable automatic "
+            + "checks for newer development releases.")]
         [TypeConverter(typeof(EnableDisableConverter))]
         public bool NotifySearchDevReleaseOption
         {
@@ -529,7 +529,7 @@ namespace QtVsTools.Core.Options
             set => NotifySearchDevRelease = value;
         }
 
-        [Settings(DevelopmentReleases.NotifySearchDevRelease, true)]
+        [Settings(Notifications.NotifySearchDevRelease, true)]
         public static bool NotifySearchDevRelease
         {
             get => QtOptionsPageSettings.Instance.GetValue(() => NotifySearchDevRelease);
