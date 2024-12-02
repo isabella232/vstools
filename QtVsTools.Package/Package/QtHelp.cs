@@ -41,7 +41,8 @@ namespace QtVsTools
             commandService?.AddCommand(new MenuCommand(F1QtHelpEventHandler,
                 new CommandID(QtMenus.Package.Guid, QtMenus.Package.F1QtHelp)));
         }
-        static bool IsSuperfluousCharacter(string text)
+
+        private static bool IsSuperfluousCharacter(string text)
         {
             switch (text) {
             case " ":
@@ -78,12 +79,12 @@ namespace QtVsTools
             return false;
         }
 
-        static string GetString(DbDataReader reader, int index)
+        private static string GetString(DbDataReader reader, int index)
         {
             return reader.IsDBNull(index) ? "" : reader.GetString(index);
         }
 
-        void F1QtHelpEventHandler(object sender, EventArgs args)
+        private static void F1QtHelpEventHandler(object sender, EventArgs args)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
             if (!ShowEditorContextHelp()) {
@@ -153,29 +154,27 @@ namespace QtVsTools
                 };
                 foreach (var file in qchFiles) {
                     builder.DataSource = file;
-                    using (var connection = new SQLiteConnection(builder.ToString())) {
-                        connection.Open();
-                        using (var command = new SQLiteCommand(linksForKeyword, connection)) {
-                            var reader = QtVsToolsPackage.Instance.JoinableTaskFactory
-                                .Run(async () => await command.ExecuteReaderAsync());
-                            using (reader) {
-                                while (reader.Read()) {
-                                    var title = GetString(reader, 0);
-                                    if (string.IsNullOrWhiteSpace(title))
-                                        title = keyword + ':' + GetString(reader, 3);
-                                    string path;
-                                    if (QtOptionsPage.HelpPreference == Offline) {
-                                        path = "file:///" + Path.Combine(docPath,
-                                            GetString(reader, 2), GetString(reader, 3));
-                                    } else {
-                                        path = "https://" + Path.Combine("doc.qt.io",
-                                            $"qt-{info.Major}", GetString(reader, 3));
-                                    }
-                                    if (!string.IsNullOrWhiteSpace(GetString(reader, 4)))
-                                        path += "#" + GetString(reader, 4);
-                                    links.Add(title, path);
-                                }
+                    using var connection = new SQLiteConnection(builder.ToString());
+                    connection.Open();
+                    using var command = new SQLiteCommand(linksForKeyword, connection);
+                    var reader = QtVsToolsPackage.Instance.JoinableTaskFactory
+                        .Run(async () => await command.ExecuteReaderAsync());
+                    using (reader) {
+                        while (reader.Read()) {
+                            var title = GetString(reader, 0);
+                            if (string.IsNullOrWhiteSpace(title))
+                                title = keyword + ':' + GetString(reader, 3);
+                            string path;
+                            if (QtOptionsPage.HelpPreference == Offline) {
+                                path = "file:///" + Path.Combine(docPath,
+                                    GetString(reader, 2), GetString(reader, 3));
+                            } else {
+                                path = "https://" + Path.Combine("doc.qt.io",
+                                    $"qt-{info.Major}", GetString(reader, 3));
                             }
+                            if (!string.IsNullOrWhiteSpace(GetString(reader, 4)))
+                                path += "#" + GetString(reader, 4);
+                            links.Add(title, path);
                         }
                     }
                 }

@@ -45,18 +45,18 @@ namespace QtVsTools
             if (commandService == null)
                 return;
 
-            var command = new OleMenuCommand(execHandler,
+            var command = new OleMenuCommand(ExecHandler,
                 new CommandID(QtMenus.Package.Guid, QtMenus.Package.lUpdateOnItem));
-            command.BeforeQueryStatus += beforeQueryStatus;
+            command.BeforeQueryStatus += BeforeQueryStatus;
             commandService.AddCommand(command);
 
-            command = new OleMenuCommand(execHandler,
+            command = new OleMenuCommand(ExecHandler,
                 new CommandID(QtMenus.Package.Guid, QtMenus.Package.lReleaseOnItem));
-            command.BeforeQueryStatus += beforeQueryStatus;
+            command.BeforeQueryStatus += BeforeQueryStatus;
             commandService.AddCommand(command);
         }
 
-        private void execHandler(object sender, EventArgs e)
+        private static void ExecHandler(object sender, EventArgs e)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -65,15 +65,15 @@ namespace QtVsTools
 
             switch (command.CommandID.ID) {
             case QtMenus.Package.lUpdateOnItem:
-                Translation.RunlUpdate(HelperFunctions.GetSelectedFiles(QtVsToolsPackage.Instance.Dte));
+                Translation.RunLUpdate(HelperFunctions.GetSelectedFiles(QtVsToolsPackage.Instance.Dte));
                 break;
             case QtMenus.Package.lReleaseOnItem:
-                Translation.RunlRelease(HelperFunctions.GetSelectedFiles(QtVsToolsPackage.Instance.Dte));
+                Translation.RunLRelease(HelperFunctions.GetSelectedFiles(QtVsToolsPackage.Instance.Dte));
                 break;
             }
         }
 
-        private void beforeQueryStatus(object sender, EventArgs e)
+        private static void BeforeQueryStatus(object sender, EventArgs e)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 

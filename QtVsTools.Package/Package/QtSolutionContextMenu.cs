@@ -41,8 +41,8 @@ namespace QtVsTools
         /// </summary>
         private enum CommandId
         {
-            lUpdateOnSolution = QtMenus.Package.lUpdateOnSolution,
-            lReleaseOnSolution = QtMenus.Package.lReleaseOnSolution,
+            LUpdateOnSolution = QtMenus.Package.lUpdateOnSolution,
+            LReleaseOnSolution = QtMenus.Package.lReleaseOnSolution,
             SolutionConvertToQtMsBuild = QtMenus.Package.SolutionConvertToQtMsBuild,
             SolutionEnableProjectTracking = QtMenus.Package.SolutionEnableProjectTracking
         }
@@ -59,13 +59,13 @@ namespace QtVsTools
                 return;
 
             foreach (int id in Enum.GetValues(typeof(CommandId))) {
-                var command = new OleMenuCommand(execHandler,
+                var command = new OleMenuCommand(ExecHandler,
                     new CommandID(QtMenus.Package.Guid, id));
                 commandService.AddCommand(command);
             }
         }
 
-        private void execHandler(object sender, EventArgs e)
+        private static void ExecHandler(object sender, EventArgs e)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -75,10 +75,10 @@ namespace QtVsTools
             var dte = QtVsToolsPackage.Instance.Dte;
             switch (command.CommandID.ID) {
             case QtMenus.Package.lUpdateOnSolution:
-                Translation.RunlUpdate(QtVsToolsPackage.Instance.Dte.Solution);
+                Translation.RunLUpdate(QtVsToolsPackage.Instance.Dte.Solution);
                 break;
             case QtMenus.Package.lReleaseOnSolution:
-                Translation.RunlRelease(QtVsToolsPackage.Instance.Dte.Solution);
+                Translation.RunLRelease(QtVsToolsPackage.Instance.Dte.Solution);
                 break;
             case QtMenus.Package.SolutionConvertToQtMsBuild:
                 MsBuildProjectConverter.SolutionToQtMsBuild();

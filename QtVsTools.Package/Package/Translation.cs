@@ -20,7 +20,7 @@ namespace QtVsTools
     /// </summary>
     public static class Translation
     {
-        public static void RunlRelease(VCFile[] vcFiles)
+        public static void RunLRelease(VCFile[] vcFiles)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -29,13 +29,13 @@ namespace QtVsTools
                 project, vcFiles.Select(vcFile => vcFile?.RelativePath));
         }
 
-        public static void RunlRelease(MsBuildProject project)
+        public static void RunLRelease(MsBuildProject project)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
             RunTranslationTarget(BuildAction.Release, project);
         }
 
-        public static void RunlRelease(EnvDTE.Solution solution)
+        public static void RunLRelease(EnvDTE.Solution solution)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -43,10 +43,10 @@ namespace QtVsTools
                 return;
 
             foreach (var project in HelperFunctions.ProjectsInSolution(solution.DTE))
-                RunlRelease(MsBuildProject.GetOrAdd(project));
+                RunLRelease(MsBuildProject.GetOrAdd(project));
         }
 
-        public static void RunlUpdate(VCFile vcFile)
+        public static void RunLUpdate(VCFile vcFile)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -55,7 +55,7 @@ namespace QtVsTools
                 project, new[] { vcFile.RelativePath });
         }
 
-        public static void RunlUpdate(VCFile[] vcFiles)
+        public static void RunLUpdate(VCFile[] vcFiles)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -64,7 +64,7 @@ namespace QtVsTools
                 project, vcFiles.Select(vcFile => vcFile?.RelativePath));
         }
 
-        public static void RunlUpdate(MsBuildProject project)
+        public static void RunLUpdate(MsBuildProject project)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
             RunTranslationTarget(BuildAction.Update, project);
@@ -106,12 +106,12 @@ namespace QtVsTools
             project.StartBuild(activeConfiguration.Name, properties, new[] { "QtTranslation" });
         }
 
-        public static void RunlUpdate(EnvDTE.Solution solution)
+        public static void RunLUpdate(EnvDTE.Solution solution)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
             foreach (var project in HelperFunctions.ProjectsInSolution(solution?.DTE))
-                RunlUpdate(MsBuildProject.GetOrAdd(project));
+                RunLUpdate(MsBuildProject.GetOrAdd(project));
         }
 
         public static bool ToolsAvailable(MsBuildProject project)

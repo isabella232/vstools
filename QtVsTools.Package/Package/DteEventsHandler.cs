@@ -33,7 +33,7 @@ namespace QtVsTools
         private VCProjectEngineEvents vcProjectEngineEvents;
         private readonly CommandEvents f1HelpEvents;
         private WindowEvents windowEvents;
-        private OutputWindowEvents outputWindowEvents;
+        private readonly OutputWindowEvents outputWindowEvents;
 
         public DteEventsHandler(DTE _dte)
         {
@@ -161,7 +161,7 @@ namespace QtVsTools
         }
 
         private void F1HelpEvents_BeforeExecute(
-            string Guid, int ID, object CustomIn, object CustomOut, ref bool CancelDefault)
+            string guid, int id, object customIn, object customOut, ref bool cancelDefault)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
             if (QtOptionsPage.TryQtHelpOnF1Pressed) {
@@ -169,7 +169,7 @@ namespace QtVsTools
                     Messages.Print("No help match was found. You can still try to search online at "
                         + "https://doc.qt.io" + ".", false, true);
                 }
-                CancelDefault = true;
+                cancelDefault = true;
             }
         }
 
@@ -306,9 +306,11 @@ namespace QtVsTools
                 } else if (HelperFunctions.IsQrcFile(vcFileName)) {
                     QtRcc.SetRccItemType(vcFile);
                 } else if (HelperFunctions.IsTranslationFile(vcFileName)) {
-                    Translation.RunlUpdate(vcFile);
+                    Translation.RunLUpdate(vcFile);
                 }
-            } catch { }
+            } catch {
+                // ignored
+            }
         }
 
         private void ProjectItemsEvents_ItemRemoved(ProjectItem projectItem)
@@ -333,7 +335,7 @@ namespace QtVsTools
             ProjectItemsEvents_ItemAdded(projectItem);
         }
 
-        private void SolutionEvents_ProjectAdded(EnvDTE.Project dteProject)
+        private void SolutionEvents_ProjectAdded(Project dteProject)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -346,7 +348,7 @@ namespace QtVsTools
             InitializeMsBuildProjectProject(project);
         }
 
-        private static void SolutionEvents_ProjectRemoved(EnvDTE.Project dteProject)
+        private static void SolutionEvents_ProjectRemoved(Project dteProject)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
             MsBuildProject.Remove(dteProject.FullName);
@@ -380,7 +382,7 @@ namespace QtVsTools
             if (vcProjectEngineEvents != null)
                 return;
 
-            if (project?.VcProject is not { VCProjectEngine: VCProjectEngine vcProjectEngine })
+            if (project.VcProject is not { VCProjectEngine: VCProjectEngine vcProjectEngine })
                 return;
 
             vcProjectEngineEvents = vcProjectEngine.Events as VCProjectEngineEvents;

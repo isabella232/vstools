@@ -63,14 +63,14 @@ namespace QtVsTools
                 return;
 
             foreach (int id in Enum.GetValues(typeof(CommandId))) {
-                var command = new OleMenuCommand(execHandler,
+                var command = new OleMenuCommand(ExecHandler,
                     new CommandID(QtMenus.Package.Guid, id));
-                command.BeforeQueryStatus += beforeQueryStatus;
+                command.BeforeQueryStatus += BeforeQueryStatus;
                 commandService.AddCommand(command);
             }
         }
 
-        private void execHandler(object sender, EventArgs e)
+        private static void ExecHandler(object sender, EventArgs e)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -83,10 +83,10 @@ namespace QtVsTools
                 ProjectImporter.ImportPriFile(dte, Utils.PackageInstallPath);
                 break;
             case QtMenus.Package.lUpdateOnProject:
-                Translation.RunlUpdate(HelperFunctions.GetSelectedQtProject(dte));
+                Translation.RunLUpdate(HelperFunctions.GetSelectedQtProject(dte));
                 break;
             case QtMenus.Package.lReleaseOnProject:
-                Translation.RunlRelease(HelperFunctions.GetSelectedQtProject(dte));
+                Translation.RunLRelease(HelperFunctions.GetSelectedQtProject(dte));
                 break;
             case QtMenus.Package.QtProjectSettingsProject:
                 QtVsToolsPackage.Instance.Dte.ExecuteCommand("Project.Properties");
@@ -111,7 +111,7 @@ namespace QtVsTools
             }
         }
 
-        private void beforeQueryStatus(object sender, EventArgs e)
+        private static void BeforeQueryStatus(object sender, EventArgs e)
         {
             if (sender is not OleMenuCommand command)
                 return;
