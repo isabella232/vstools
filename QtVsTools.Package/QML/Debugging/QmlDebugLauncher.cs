@@ -375,8 +375,7 @@ namespace QtVsTools.Qml.Debug
             var isNative = targets[0].guidLaunchDebugEngine == NativeEngine.Id ||
                 targets[0].guidLaunchDebugEngine == COMPlusNativeEngine.Id;
             var hasEnv = targets[0].bstrEnv is { Length: > 0 };
-            var noDebug = (targets[0].LaunchFlags & (uint)__VSDBGLAUNCHFLAGS.DBGLAUNCH_NoDebug) > 0;
-            if (!isNative || !hasEnv || noDebug)
+            if (!isNative || !hasEnv)
                 return NextHook?.OnLaunchDebugTargets(targetCount, targets, results) ?? S_OK;
 
             var envString = string.Join("\r\n", targets[0].bstrEnv.Split('\0'));
@@ -385,8 +384,17 @@ namespace QtVsTools.Qml.Debug
 
             if (env.ContainsKey("PATH") && env.ContainsKey("QTDIR")) {
                 env["PATH"] += $";{env["QTDIR"]}/bin";
-                targets[0].bstrEnv = string.Join("\0", env.Select(x => $"{x.Key}={x.Value}"));
+                var bstrEnv = string.Join("\0", env.Select(kv => $"{kv.Key}={kv.Value}"));
+                targets[0].bstrEnv = bstrEnv + '\0'; // Add a final list-terminating null character
             }
+
+            // Early return when starting a QML project in a debug configuration, but without debug
+            // enabled (e.g. Ctrl+F5), the parameters for connecting to the QML runtime should not
+            // be passed to the process being started. Otherwise, the process will block indefinitely
+            // as the QML runtime waits for a connection from the (disabled) debug engine.
+            var noDebug = (targets[0].LaunchFlags & (uint)__VSDBGLAUNCHFLAGS.DBGLAUNCH_NoDebug) > 0;
+            if (noDebug)
+                return NextHook?.OnLaunchDebugTargets(targetCount, targets, results) ?? S_OK;
 
             if (QtOptionsPage.QmlDebuggerEnabled && env.TryGetValue("QML_DEBUG_ARGS",
                 out var qmlDebugArgs)) {
