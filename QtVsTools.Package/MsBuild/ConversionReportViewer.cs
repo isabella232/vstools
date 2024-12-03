@@ -57,7 +57,7 @@ namespace QtVsTools.Package.MsBuild
             TextBox.VerticalScrollBarVisibility = ScrollBarVisibility.Visible;
             TextBox.IsReadOnly = true;
             TextBox.IsReadOnlyCaretVisible = false;
-            Content = TextBox;
+            Content = TextBox; // Intentional bad practice: Virtual member call in constructor.
         }
 
         public int LoadDocData(string path)
@@ -76,10 +76,10 @@ namespace QtVsTools.Package.MsBuild
                 foreach (var file in files.Properties()) {
                     File.WriteAllText(TempBefore[file.Name]
                         = $@"{Path.GetTempPath()}\{Path.GetRandomFileName()}.xml",
-                        Utils.FromZipBase64(file.Value["before"].Value<string>()));
+                        Utils.FromZipBase64(file.Value["before"]!.Value<string>()));
                     File.WriteAllText(TempAfter[file.Name]
                         = $@"{Path.GetTempPath()}\{Path.GetRandomFileName()}.xml",
-                        Utils.FromZipBase64(file.Value["after"].Value<string>()));
+                        Utils.FromZipBase64(file.Value["after"]!.Value<string>()));
                 }
             } catch (Exception) {
                 return VSConstants.E_FAIL;
@@ -169,7 +169,7 @@ namespace QtVsTools.Package.MsBuild
 
     #region ### BOILERPLATE ########################################################################
 
-    public partial class ConversionReportViewer : IVsEditorFactory
+    public partial class ConversionReportViewer
     {
         public int SetSite(IServiceProvider psp)
         {
@@ -180,14 +180,14 @@ namespace QtVsTools.Package.MsBuild
         public int CreateEditorInstance(uint grfCreateDoc, string pszMkDocument,
             string pszPhysicalView, IVsHierarchy pvHier, uint itemid, IntPtr punkDocDataExisting,
             out IntPtr ppunkDocView, out IntPtr ppunkDocData, out string pbstrEditorCaption,
-            out Guid pguidCmdUI, out int pgrfCDW)
+            out Guid pguidCmdUi, out int pgrfCdw)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
             ppunkDocView = IntPtr.Zero;
             ppunkDocData = IntPtr.Zero;
-            pguidCmdUI = Guid;
-            pgrfCDW = 0;
+            pguidCmdUi = Guid;
+            pgrfCdw = 0;
             pbstrEditorCaption = null;
 
             if ((grfCreateDoc & (VSConstants.CEF_OPENFILE | VSConstants.CEF_SILENT)) == 0) {
@@ -201,7 +201,7 @@ namespace QtVsTools.Package.MsBuild
             ppunkDocView = Marshal.GetIUnknownForObject(ViewerWindow);
             ppunkDocData = Marshal.GetIUnknownForObject(ViewerWindow);
             pbstrEditorCaption = "";
-            pgrfCDW = (int)(_VSRDTFLAGS.RDT_CantSave | _VSRDTFLAGS.RDT_DontAutoOpen);
+            pgrfCdw = (int)(_VSRDTFLAGS.RDT_CantSave | _VSRDTFLAGS.RDT_DontAutoOpen);
 
             return VSConstants.S_OK;
         }
@@ -209,17 +209,16 @@ namespace QtVsTools.Package.MsBuild
         public int MapLogicalView(ref Guid rguidLogicalView, out string pbstrPhysicalView)
         {
             pbstrPhysicalView = null;
-            if (VSConstants.LOGVIEWID_Primary == rguidLogicalView)
-                return VSConstants.S_OK;
-            return VSConstants.E_NOTIMPL;
+            return VSConstants.LOGVIEWID_Primary == rguidLogicalView
+                ? VSConstants.S_OK : VSConstants.E_NOTIMPL;
         }
     }
 
-    public partial class ConversionReportViewerWindow : WindowPane, IVsPersistDocData
+    public partial class ConversionReportViewerWindow
     {
-        public int GetGuidEditorType(out Guid pClassID)
+        public int GetGuidEditorType(out Guid pClassId)
         {
-            pClassID = ConversionReportViewer.Guid;
+            pClassId = ConversionReportViewer.Guid;
             return VSConstants.S_OK;
         }
 
