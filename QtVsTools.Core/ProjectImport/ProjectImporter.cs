@@ -27,7 +27,7 @@ namespace QtVsTools.Core
 
         private const string ProjectFileExtension = ".vcxproj";
 
-        public static void ImportProFile(EnvDTE.DTE dte)
+        public static void ImportProFile(DTE dte)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -73,7 +73,7 @@ namespace QtVsTools.Core
             }
         }
 
-        public static void ImportPriFile(EnvDTE.DTE dte, string pkgInstallPath)
+        public static void ImportPriFile(DTE dte, string pkgInstallPath)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -199,8 +199,8 @@ namespace QtVsTools.Core
                 }
 
                 // figure out if the imported project is a plugin project
-                var tmp = vcPro.ActiveConfiguration.ConfigurationName;
-                var vcConfig = (vcPro.Configurations as IVCCollection)?.Item(tmp)
+                var tmp = vcPro?.ActiveConfiguration.ConfigurationName;
+                var vcConfig = (vcPro?.Configurations as IVCCollection)?.Item(tmp)
                     as VCConfiguration;
                 var def = CompilerToolWrapper.Create(vcConfig)?.GetPreprocessorDefinitions();
                 if (!string.IsNullOrEmpty(def) && def.IndexOf("QT_PLUGIN", IgnoreCase) > -1)
@@ -279,7 +279,7 @@ namespace QtVsTools.Core
             ThreadHelper.ThrowIfNotOnUIThread();
 
             RemoveResFilesFromGeneratedFilesFilter(project);
-            // collapse the generated files/resources filters afterwards
+            // collapse the generated files/resources filters afterward
             CollapseFilter(project.VcProject, FakeFilter.ResourceFiles().Name);
             CollapseFilter(project.VcProject, FakeFilter.GeneratedFiles().Name);
 
@@ -421,9 +421,8 @@ namespace QtVsTools.Core
                 var i = path.LastIndexOf(Path.DirectorySeparatorChar);
                 path = i > -1 ? path.Substring(0, i) : ".";
 
-                if (pathFilterTable.ContainsKey(path)) {
-                    if (pathFilterTable[path] is {} vcFilter)
-                        vcFilter.AddFile(file);
+                if (pathFilterTable.TryGetValue(path, out var vcFilter)) {
+                    vcFilter?.AddFile(file);
                     continue;
                 }
 
@@ -721,7 +720,10 @@ namespace QtVsTools.Core
                     if (projectItem is not null)
                         break;
                 }
-            } catch {}
+            } catch {
+                // ignored
+            }
+
             return projectItem;
         }
 
@@ -766,15 +768,15 @@ namespace QtVsTools.Core
 
             var envPro = vcPro.Object as Project;
             try {
-                var cfgMgr = envPro.ConfigurationManager;
-                cfgMgr.AddPlatform(newPlatform, oldPlatform, true);
+                var cfgMgr = envPro?.ConfigurationManager;
+                cfgMgr?.AddPlatform(newPlatform, oldPlatform, true);
                 vcPro.AddPlatform(newPlatform);
             } catch {
                 // That stupid ConfigurationManager can't handle platform names
                 // containing dots (e.g. "Windows Mobile 5.0 Pocket PC SDK (ARMV4I)")
                 // So we have to do it the nasty way...
-                var projectFileName = envPro.FullName;
-                envPro.Save(null);
+                var projectFileName = envPro?.FullName;
+                envPro?.Save(null);
                 _dteObject.Solution.Remove(envPro);
                 AddPlatformToVcProj(projectFileName, oldPlatform, newPlatform);
                 envPro = _dteObject.Solution.AddFromFile(projectFileName);
