@@ -11,7 +11,7 @@ using System.Runtime.Serialization;
 namespace QtVsTools.Json
 {
     /// <summary>
-    /// Classes in an hierarchy derived from Serializable<T> represent objects that can be mapped
+    /// Classes in a hierarchy derived from Serializable<T> represent objects that can be mapped
     /// to and from JSON data using the DataContractJsonSerializer class. When deserializing, the
     /// class hierarchy will be searched for the derived class best suited to the data.
     /// </summary>
@@ -63,7 +63,7 @@ namespace QtVsTools.Json
         /// hierarchy looking for a suitable target type for deserialization.
         /// </summary>
         ///
-        bool SkipDeserialization
+        private bool SkipDeserialization
         {
             get
             {
@@ -92,8 +92,8 @@ namespace QtVsTools.Json
 
         #region //////////////////// Deferred Objects /////////////////////////////////////////////
 
-        List<IDeferredObject> deferredObjects;
-        List<IDeferredObject> DeferredObjects
+        private List<IDeferredObject> deferredObjects;
+        private List<IDeferredObject> DeferredObjects
         {
             get
             {
@@ -158,7 +158,7 @@ namespace QtVsTools.Json
         ///
         public static TBase Deserialize(object initArgs, byte[] data)
         {
-            TBase obj = DeserializeClassHierarchy(initArgs, Serializer.Parse(data));
+            var obj = DeserializeClassHierarchy(initArgs, Serializer.Parse(data));
             if (obj == null)
                 return null;
 
@@ -212,12 +212,12 @@ namespace QtVsTools.Json
             //                  Found suitable node!!
             //                  Return tentative object as final result of deserialization.
             //              Else
-            //                  Save tentative object as last sucessful deserialization.
+            //                  Save tentative object as last successful deserialization.
             //                  Add child nodes to the nodes to visit.
             //          If inconclusive (i.e. a child node might be compatible)
             //              Add child nodes to the nodes to visit.
             //  If no suitable node was found
-            //      Return last sucessful deserialization as final result of deserialization.
+            //      Return last successful deserialization as final result of deserialization.
 
             lock (BaseClass.Prototype.CriticalSection) {
 
@@ -225,11 +225,11 @@ namespace QtVsTools.Json
                 TBase lastCompatibleObj = null;
 
                 // Traverse class hierarchy tree looking for a compatible leaf node
-                // i.e. compatible class without any sub-classes
+                // i.e. compatible class without any subclasses
                 while (toDo.Count > 0) {
                     var subClass = toDo.Dequeue();
 
-                    // Try to deserialize as sub-class
+                    // Try to deserialize as subclass
                     TBase tryObj;
                     if (jsonData.IsEmpty())
                         tryObj = CreateInstance(subClass.Type);
@@ -270,21 +270,21 @@ namespace QtVsTools.Json
                 }
 
                 // No compatible leaf node found
-                // Use last successful (non-leaf) deserializtion, if any
+                // Use last successful (non-leaf) deserialization, if any
                 return lastCompatibleObj;
             }
         }
 
         /// <summary>
-        /// Get list of sub-classes of a particular class that are potentially suitable to the
-        /// deserialized data. Sub-classes marked with the [SkipDeserialization] attribute will not
+        /// Get list of subclasses of a particular class that are potentially suitable to the
+        /// deserialized data. Subclasses marked with the [SkipDeserialization] attribute will not
         /// be returned; their own sub-sub-classes will be tested for compatibility and returned in
         /// case they are potentially suitable (i.e.: IsCompatible == true || IsCompatible == null)
         /// </summary>
-        /// <param name="subClass">Class whose sub-classes are to be tested</param>
+        /// <param name="subClass">Class whose subclasses are to be tested</param>
         /// <param name="tryObj">Deserialized data</param>
-        /// <returns>List of sub-classes that are potentially suitable for deserialization</returns>
-        static List<SubClass> PotentialSubClasses(SubClass subClass, TBase tryObj)
+        /// <returns>List of subclasses that are potentially suitable for deserialization</returns>
+        private static List<SubClass> PotentialSubClasses(SubClass subClass, TBase tryObj)
         {
             if (subClass == null || tryObj == null)
                 return new List<SubClass>();

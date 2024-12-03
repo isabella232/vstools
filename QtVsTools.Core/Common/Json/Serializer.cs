@@ -74,8 +74,8 @@ namespace QtVsTools.Json
 
         public static Serializer Create(Type type)
         {
-            var _this = new Serializer();
-            return _this.Initialize(type) ? _this : null;
+            var obj = new Serializer();
+            return obj.Initialize(type) ? obj : null;
         }
 
         private Serializer()
@@ -83,11 +83,12 @@ namespace QtVsTools.Json
 
         private bool Initialize(Type type)
         {
-            var settings = new DataContractJsonSerializerSettings();
-            settings.DataContractSurrogate = new DataContractSurrogate { Serializer = this };
-            settings.EmitTypeInformation = EmitTypeInformation.Never;
-            settings.UseSimpleDictionaryFormat = true;
-
+            var settings = new DataContractJsonSerializerSettings
+            {
+                DataContractSurrogate = new DataContractSurrogate { Serializer = this },
+                EmitTypeInformation = EmitTypeInformation.Never,
+                UseSimpleDictionaryFormat = true
+            };
             serializer = new DataContractJsonSerializer(type, settings);
             return serializer != null;
         }
@@ -95,18 +96,17 @@ namespace QtVsTools.Json
         public IJsonData Serialize(object obj, bool indent = false)
         {
             var stream = new MemoryStream();
-            using (var writer = JsonReaderWriterFactory
-                .CreateJsonWriter(stream, Encoding.UTF8, true, indent)) {
-                try {
-                    serializer.WriteObject(writer, obj);
-                    writer.Close();
-                    return new JsonData { Stream = stream };
-                } catch (Exception exception) {
-                    exception.Log();
-                    if (stream is { CanRead: true, Length: > 0 })
-                        stream.Dispose();
-                    return null;
-                }
+            using var writer = JsonReaderWriterFactory
+                .CreateJsonWriter(stream, Encoding.UTF8, true, indent);
+            try {
+                serializer.WriteObject(writer, obj);
+                writer.Close();
+                return new JsonData { Stream = stream };
+            } catch (Exception exception) {
+                exception.Log();
+                if (stream is { CanRead: true, Length: > 0 })
+                    stream.Dispose();
+                return null;
             }
         }
 
@@ -170,12 +170,11 @@ namespace QtVsTools.Json
         {
             try {
                 var q = new XmlDictionaryReaderQuotas();
-                using (var reader = JsonReaderWriterFactory.CreateJsonReader(data.Stream, q)) {
-                    reader.Read();
-                    var xmlData = Encoding.UTF8.GetBytes(reader.ReadOuterXml());
-                    reader.Close();
-                    data.XmlStream = new MemoryStream(xmlData);
-                }
+                using var reader = JsonReaderWriterFactory.CreateJsonReader(data.Stream, q);
+                reader.Read();
+                var xmlData = Encoding.UTF8.GetBytes(reader.ReadOuterXml());
+                reader.Close();
+                data.XmlStream = new MemoryStream(xmlData);
                 return true;
             } catch (Exception exception) {
                 exception.Log();
@@ -218,18 +217,18 @@ namespace QtVsTools.Json
 
         #region //////////////////// Data Contract Surrogate //////////////////////////////////////
 
-        static readonly Exclusive<Serializer> sharedInstance = new();
+        private static readonly Exclusive<Serializer> SharedInstance = new();
         private XmlReader reader;
         private readonly List<IDeferredObject> deferredObjects = new();
 
         public static IJsonData GetCurrentJsonData()
         {
-            Serializer _this = sharedInstance;
+            Serializer instance = SharedInstance;
             try {
                 var root = new StringBuilder();
                 root.Append("<root type=\"object\">");
-                while (_this.reader.IsStartElement())
-                    root.Append(_this.reader.ReadOuterXml());
+                while (instance.reader.IsStartElement())
+                    root.Append(instance.reader.ReadOuterXml());
                 root.Append("</root>");
                 var xmlData = Encoding.UTF8.GetBytes(root.ToString());
                 return new JsonData { XmlStream = new MemoryStream(xmlData) };
@@ -239,7 +238,7 @@ namespace QtVsTools.Json
             }
         }
 
-        class DataContractSurrogate : IDataContractSurrogate
+        private class DataContractSurrogate : IDataContractSurrogate
         {
             public Serializer Serializer { get; set; }
 
@@ -247,7 +246,7 @@ namespace QtVsTools.Json
             {
                 if (typeof(IDeferredObject).IsAssignableFrom(type)) {
                     // About to process a deferred object: lock shared serializer
-                    sharedInstance.Set(Serializer);
+                    SharedInstance.Set(Serializer);
                 }
                 return type;
             }
@@ -259,7 +258,7 @@ namespace QtVsTools.Json
                     Serializer.deferredObjects.Add(obj as IDeferredObject);
 
                     // ...and release shared serializer
-                    sharedInstance.Release();
+                    SharedInstance.Release();
                 }
                 return obj;
             }
@@ -268,7 +267,7 @@ namespace QtVsTools.Json
             {
                 if (obj is IDeferredObject deferredObject) {
                     // Deferred object serialized: release shared serializer
-                    sharedInstance.Release();
+                    SharedInstance.Release();
 
                     return deferredObject.Object;
                 }

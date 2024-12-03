@@ -12,7 +12,7 @@ namespace QtVsTools.Json
     /// </summary>
     /// <typeparam name="TBase">Base type of deferred data</typeparam>
     ///
-    public interface IDeferrable<TBase>
+    public interface IDeferrable<out TBase>
     {
         TBase Deserialize(IJsonData jsonData);
     }
@@ -46,7 +46,7 @@ namespace QtVsTools.Json
         }
 
         [OnDeserializing] // <-- Invoked by serializer before deserializing this object
-        void OnDeserializing(StreamingContext context)
+        private void OnDeserializing(StreamingContext context)
         {
             // Store JSON data corresponding to this object
             jsonData = Serializer.GetCurrentJsonData();
@@ -74,9 +74,9 @@ namespace QtVsTools.Json
             jsonData?.Dispose();
         }
 
-        public static implicit operator TBase(DeferredObject<TBase> _this)
+        public static implicit operator TBase(DeferredObject<TBase> obj)
         {
-            return _this.Object;
+            return obj.Object;
         }
     }
 }
