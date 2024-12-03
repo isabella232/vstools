@@ -161,7 +161,7 @@ namespace QtVsTools.Core.Options
             var enableAutodetect = new[]
             {
                 Environment.GetFolderPath(Environment.SpecialFolder.Programs),
-                Environment.GetFolderPath(Environment.SpecialFolder.CommonPrograms),
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonPrograms)
             }.Any(folder => File.Exists(Path.Combine(folder, QtMaintenanceToolLnk)));
             enableAutodetect |= File.Exists(Path.Combine(Environment.GetFolderPath(
                 Environment.SpecialFolder.ApplicationData), QtVersionsXmlCreator));

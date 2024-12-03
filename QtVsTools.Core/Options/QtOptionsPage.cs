@@ -172,7 +172,7 @@ namespace QtVsTools.Core.Options
             QtOptionsPageSettings.Instance.GetValue(() => QmlDebuggerEnabled);
 
         [Category("QML Debugging")]
-        [DisplayName("Runtime connection timeout (msecs)")]
+        [DisplayName("Runtime connection timeout (ms)")]
         [TypeConverter(typeof(TimeoutConverter))]
         public Timeout QmlDebuggerTimeoutOption
         {
