@@ -261,7 +261,7 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\QrcEditor.exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalOptions>"/MANIFESTDEPENDENCY:type='*' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <IgnoreImportLibrary>true</IgnoreImportLibrary>
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
@@ -294,7 +294,7 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\QrcEditor.exe</OutputFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalOptions>"/MANIFESTDEPENDENCY:type='*' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <IgnoreImportLibrary>true</IgnoreImportLibrary>
       <LinkIncremental>false</LinkIncremental>
