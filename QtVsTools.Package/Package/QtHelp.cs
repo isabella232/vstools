@@ -6,10 +6,11 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
-using System.Data.Common;
+using System.Data;
 using System.Data.SQLite;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -19,7 +20,6 @@ namespace QtVsTools
     using Core;
     using Core.Options;
     using VisualStudio;
-    using static Core.Options.QtOptionsPage.SourcePreference;
 
     public class QtHelp
     {
@@ -79,7 +79,7 @@ namespace QtVsTools
             return false;
         }
 
-        private static string GetString(DbDataReader reader, int index)
+        private static string GetString(IDataRecord reader, int index)
         {
             return reader.IsDBNull(index) ? "" : reader.GetString(index);
         }
@@ -148,36 +148,7 @@ namespace QtVsTools
                     + $"a.NamespaceId=f.Id AND a.Name='{keyword}'";
 
                 var links = new Dictionary<string, string>();
-                var builder = new SQLiteConnectionStringBuilder
-                {
-                    ReadOnly = true
-                };
-                foreach (var file in qchFiles) {
-                    builder.DataSource = file;
-                    using var connection = new SQLiteConnection(builder.ToString());
-                    connection.Open();
-                    using var command = new SQLiteCommand(linksForKeyword, connection);
-                    var reader = QtVsToolsPackage.Instance.JoinableTaskFactory
-                        .Run(async () => await command.ExecuteReaderAsync());
-                    using (reader) {
-                        while (reader.Read()) {
-                            var title = GetString(reader, 0);
-                            if (string.IsNullOrWhiteSpace(title))
-                                title = keyword + ':' + GetString(reader, 3);
-                            string path;
-                            if (QtOptionsPage.HelpPreference == Offline) {
-                                path = "file:///" + Path.Combine(docPath,
-                                    GetString(reader, 2), GetString(reader, 3));
-                            } else {
-                                path = "https://" + Path.Combine("doc.qt.io",
-                                    $"qt-{info.Major}", GetString(reader, 3));
-                            }
-                            if (!string.IsNullOrWhiteSpace(GetString(reader, 4)))
-                                path += "#" + GetString(reader, 4);
-                            links.Add(title, path);
-                        }
-                    }
-                }
+                ProcessQchFiles(qchFiles, linksForKeyword, keyword, docPath, info, links);
 
                 string uri;
                 switch (links.Values.Count) {
@@ -219,7 +190,7 @@ namespace QtVsTools
 
         private static bool TryShowGenericSearchResultsOnline(string keyword, uint version)
         {
-            if (QtOptionsPage.HelpPreference != Online)
+            if (QtOptionsPage.HelpPreference != QtOptionsPage.SourcePreference.Online)
                 return false;
 
             VsShellUtilities.OpenSystemBrowser(HelperFunctions.FromNativeSeparators(
@@ -229,6 +200,49 @@ namespace QtVsTools
                 }.ToString())
             );
             return true;
+        }
+
+        private static void ProcessQchFiles(IEnumerable<string> qchFiles, string linksForKeyword,
+            string keyword, string docPath, VersionInformation info, IDictionary<string, string> links)
+        {
+            QtVsToolsPackage.Instance.JoinableTaskFactory.Run(() =>
+                ProcessQchFilesAsync(qchFiles, linksForKeyword, keyword, docPath, info, links));
+        }
+
+        private static async Task ProcessQchFilesAsync(IEnumerable<string> qchFiles,
+            string linksForKeyword, string keyword, string docPath, VersionInformation info,
+            IDictionary<string, string> links)
+        {
+            var builder = new SQLiteConnectionStringBuilder
+            {
+                ReadOnly = true
+            };
+
+            foreach (var file in qchFiles) {
+                builder.DataSource = file;
+
+                using var connection = new SQLiteConnection(builder.ToString());
+                await connection.OpenAsync();
+
+                using var command = new SQLiteCommand(linksForKeyword, connection);
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync()) {
+                    var title = GetString(reader, 0);
+                    if (string.IsNullOrWhiteSpace(title))
+                        title = keyword + ':' + GetString(reader, 3);
+                    string path;
+                    if (QtOptionsPage.HelpPreference == QtOptionsPage.SourcePreference.Offline) {
+                        path = "file:///" + Path.Combine(docPath,
+                            GetString(reader, 2), GetString(reader, 3));
+                    } else {
+                        path = "https://" + Path.Combine("doc.qt.io",
+                            $"qt-{info.Major}", GetString(reader, 3));
+                    }
+                    if (!string.IsNullOrWhiteSpace(GetString(reader, 4)))
+                        path += "#" + GetString(reader, 4);
+                    links.Add(title, path);
+                }
+            }
         }
     }
 }
