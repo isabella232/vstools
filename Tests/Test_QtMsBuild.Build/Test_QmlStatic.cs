@@ -83,7 +83,7 @@ QmlObject {{ }}
         {
             using var qtVersions = Registry.CurrentUser
                 .OpenSubKey(@"SOFTWARE\QtProject\QtVsTools\Versions");
-            if (!qtVersions.GetSubKeyNames().Contains("dev_static"))
+            if (qtVersions == null || !qtVersions.GetSubKeyNames().Contains("dev_static"))
                 Assert.Inconclusive("Requires static build registered as 'dev_static'.");
 
             using var temp = new TempProject();
