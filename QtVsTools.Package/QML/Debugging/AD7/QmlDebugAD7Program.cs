@@ -302,7 +302,7 @@ namespace QtVsTools.Qml.Debug.AD7
             foreach (var frame in frames) {
                 CurrentFrames.Add(StackFrame.Create(frame.Name, frame.Number, frame.Scopes,
                     CodeContext.Create(Engine, this,
-                    Engine.FileSystem[frame.QrcPath].FilePath, (uint)frame.Line)));
+                    Engine.FileSystem[frame.QrcPath], (uint)frame.Line)));
             }
         }
 

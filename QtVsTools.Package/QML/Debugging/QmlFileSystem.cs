@@ -16,21 +16,15 @@ namespace QtVsTools.Qml.Debug
     using Core;
     using static Core.Common.Utils;
 
-    struct QmlFile
+    internal class FileSystem : Concurrent
     {
-        public string QrcPath;
-        public string FilePath;
-    }
-
-    class FileSystem : Concurrent
-    {
-        Dictionary<string, QmlFile> files;
+        private Dictionary<string, string> qrcToLocalFileMap;
 
         public static FileSystem Create()
         {
             return new FileSystem
             {
-                files = new Dictionary<string, QmlFile>()
+                qrcToLocalFileMap = new Dictionary<string, string>()
             };
         }
 
@@ -68,6 +62,7 @@ namespace QtVsTools.Qml.Debug
                     })
                     .Where(z => KNOWN_EXTENSIONS.Contains(Path.GetExtension(z.Path), CaseIgnorer)));
 
+            var rccFileDir = Path.GetDirectoryName(rccFilePath);
             foreach (var file in files) {
                 string qrcPath;
                 if (file.Alias != null)
@@ -84,18 +79,12 @@ namespace QtVsTools.Qml.Debug
                 while (!string.IsNullOrEmpty(qrcPathPrefix) && qrcPathPrefix[0] == Path.AltDirectorySeparatorChar)
                     qrcPathPrefix = qrcPathPrefix.Substring(1);
 
-                var qmlFile = new QmlFile
-                {
-                    FilePath = Path.Combine(Path.GetDirectoryName(rccFilePath), file.Path),
-                    QrcPath = $"qrc:///{qrcPathPrefix}{qrcPath}"
-                };
-
-                this.files[qmlFile.QrcPath.ToLower()] = qmlFile;
-                this.files[qmlFile.FilePath.ToUpper()] = qmlFile;
+                qrcToLocalFileMap[$"qrc:///{qrcPathPrefix}{qrcPath}"] =
+                    HelperFunctions.ToNativeSeparator(Path.Combine(rccFileDir!, file.Path));
             }
         }
 
-        QmlFile FromQrcPath(string qrcPath)
+        private string FromQrcPath(string qrcPath)
         {
             // Normalize qrc path:
             //  - Only pre-condition is that qrcPath have a "qrc:" prefix
@@ -111,55 +100,38 @@ namespace QtVsTools.Qml.Debug
                 qrcPath = qrcPath.Substring(1);
 
             qrcPath = $"qrc:///{qrcPath}";
-
-            return files.TryGetValue(qrcPath, out var file) ? file : default;
+            return qrcToLocalFileMap.TryGetValue(qrcPath, out var filePath) ? filePath : default;
         }
 
-        QmlFile FromFileUrl(string fileUrl)
+        private static string FromFileUrl(string fileUrl)
         {
-            string filePath = fileUrl.Substring("file://".Length);
+            var filePath = fileUrl.Substring("file://".Length);
 
             while (!string.IsNullOrEmpty(filePath) && filePath[0] == Path.AltDirectorySeparatorChar)
                 filePath = filePath.Substring(1);
 
-            if (!File.Exists(filePath))
-                return default;
-
-            return new QmlFile
-            {
-                QrcPath = fileUrl,
-                FilePath = HelperFunctions.ToNativeSeparator(filePath)
-            };
+            return File.Exists(filePath) ? HelperFunctions.ToNativeSeparator(filePath) : default;
         }
 
-        QmlFile FromFilePath(string filePath)
+        private static string FromFilePath(string filePath)
         {
-            string fullPath;
             try {
-                fullPath = Path.GetFullPath(filePath).ToUpper();
+                var fullPath = Path.GetFullPath(filePath);
+                return File.Exists(fullPath) ? new Uri(fullPath).AbsoluteUri : default;
             } catch {
                 return default;
             }
-
-            if (files.TryGetValue(fullPath, out QmlFile file))
-                return file;
-
-            return new QmlFile
-            {
-                FilePath = fullPath,
-                QrcPath = new Uri(fullPath).ToString().ToLower()
-            };
         }
 
-        public QmlFile this[string path]
+        public string this[string path]
         {
             get
             {
                 if (path.StartsWith("qrc:", IgnoreCase))
-                    return FromQrcPath(path.ToLower());
+                    return FromQrcPath(path);
                 if (path.StartsWith("file:", IgnoreCase))
                     return FromFileUrl(path);
-                return FromFilePath(path.ToUpper());
+                return FromFilePath(path);
             }
         }
     }
