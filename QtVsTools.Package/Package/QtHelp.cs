@@ -10,10 +10,11 @@ using System.Data;
 using System.Data.SQLite;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+
+using Tasks = System.Threading.Tasks;
 
 namespace QtVsTools
 {
@@ -205,11 +206,11 @@ namespace QtVsTools
         private static void ProcessQchFiles(IEnumerable<string> qchFiles, string linksForKeyword,
             string keyword, string docPath, VersionInformation info, IDictionary<string, string> links)
         {
-            QtVsToolsPackage.Instance.JoinableTaskFactory.Run(() =>
+            ThreadHelper.JoinableTaskFactory.Run(async () => await
                 ProcessQchFilesAsync(qchFiles, linksForKeyword, keyword, docPath, info, links));
         }
 
-        private static async Task ProcessQchFilesAsync(IEnumerable<string> qchFiles,
+        private static async Tasks.Task ProcessQchFilesAsync(IEnumerable<string> qchFiles,
             string linksForKeyword, string keyword, string docPath, VersionInformation info,
             IDictionary<string, string> links)
         {
